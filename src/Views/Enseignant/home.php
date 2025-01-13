@@ -1,6 +1,12 @@
 <?php
 require_once '../../../vendor/autoload.php';
 use App\Controllers\OffreController;
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../Auth/login.php");
+    exit();
+}
 
 if($_SERVER["REQUEST_METHOD"] == "POST")
 {

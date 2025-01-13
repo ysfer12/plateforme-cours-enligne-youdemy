@@ -6,6 +6,8 @@ use App\Config\Database;
 use App\Models\UserModel;
 use PDO;
 
+session_start(); // Start the session
+
 class AuthController {
     public function login($email, $mot_de_pass) {
         $userModel = new UserModel();
@@ -16,13 +18,15 @@ class AuthController {
             return; // Exit the function if user is not found
         }
 
-        // Check if the user's account is active
         if ($user->getStatut() !== 'isActive') {
             echo "Your account is not yet activated. Please contact the administrator.";
-            return; // Exit the function if the account is not active
+            return; 
         }
+        
+        $_SESSION['user_id'] = $user->getId();
+        $_SESSION['user_role'] = $user->getRole()->getTitle();
 
-        // Proceed with role-based redirection
+
         $role = $user->getRole();
         if ($role) {
             switch ($role->getTitle()) {
@@ -30,10 +34,10 @@ class AuthController {
                     header("Location: ../admin/dashboard.php");
                     break;
                 case "teacher":
-                    header("Location: ../candidate/home.php");
+                    header("Location: ../Enseignant/home.php");
                     break;
                 case "student":
-                    header("Location: ../recruiter/home.php");
+                    header("Location: ../Etudiant/home.php");
                     break;
                 default:
                     echo "Invalid role.";
