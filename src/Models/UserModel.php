@@ -46,6 +46,10 @@ class UserModel {
             );
         }
     }
+    public function logout() {
+        session_destroy();
+        header("Location: ../login.php");
+    }
 
     public function register($firstname, $lastname, $email, $password, $roleTitle) {
         // Fetch the role ID based on the role title

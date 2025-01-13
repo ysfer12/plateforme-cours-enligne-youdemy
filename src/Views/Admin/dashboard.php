@@ -1,370 +1,183 @@
+<?php
+require_once("../../../vendor/autoload.php");
+use App\Config\Database;
+$db = new Database();
+$pdo = $db->connection();
+
+// Détection de la page active
+$page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
+
+// Fetch dashboard statistics
+$stats = [
+    'total_students' => $pdo->query("SELECT COUNT(*) FROM user u JOIN role r ON u.role_id = r.role_id WHERE r.title = 'student'")->fetchColumn(),
+    'total_courses' => $pdo->query("SELECT COUNT(*) FROM Courses")->fetchColumn(),
+    'total_teachers' => $pdo->query("SELECT COUNT(*) FROM user u JOIN role r ON u.role_id = r.role_id WHERE r.title = 'teacher'")->fetchColumn(),
+    'total_enrollments' => $pdo->query("SELECT COUNT(*) FROM Enrollments")->fetchColumn()
+];
+?>
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CareerLink - Dashboard Administrateur</title>
+    <title>YouDemy Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
-        }
-
-        .btn-open-popup {
-            padding: 12px 24px;
-            font-size: 18px;
-            background-color: green;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .btn-open-popup:hover {
-            background-color: #4caf50;
-        }
-
-        .overlay-container {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .popup-box {
-            background: #fff;
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
-            width: 320px;
-            text-align: center;
-            opacity: 0;
-            transform: scale(0.8);
-            animation: fadeInUp 0.5s ease-out forwards;
-        }
-
-        .form-container {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-label {
-            margin-bottom: 10px;
-            font-size: 16px;
-            color: #444;
-            text-align: left;
-        }
-
-        .form-input {
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 16px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .btn-submit,
-        .btn-close-popup {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        .btn-submit {
-            background-color: green;
-            color: #fff;
-        }
-
-        .btn-close-popup {
-            margin-top: 12px;
-            background-color: #e74c3c;
-            color: #fff;
-        }
-
-        .btn-submit:hover,
-        .btn-close-popup:hover {
-            background-color: #4caf50;
-        }
-
-        /* Keyframes for fadeInUp animation */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Animation for popup */
-        .overlay-container.show {
-            display: flex;
-            opacity: 1;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-100">
     <!-- Sidebar -->
-    <aside class="fixed top-0 left-0 h-screen w-64 bg-gray-800 text-white p-4">
-        <div class="flex items-center mb-8">
-            <i class="fas fa-briefcase text-2xl mr-2"></i>
-            <span class="text-xl font-bold">CareerLink Admin</span>
+    <div class="fixed inset-y-0 left-0 w-64 bg-gray-900 text-white">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold">YouDemy Admin</h1>
         </div>
-
-        <nav class="space-y-2">
-            <a href="#" class="flex items-center space-x-2 bg-blue-600 text-white p-3 rounded-lg">
-                <i class="fas fa-chart-line"></i>
-                <span>Tableau de bord</span>
+        <nav class="mt-6">
+            <a href="?page=dashboard" class="flex items-center px-6 py-3 text-gray-100 <?= $page === 'dashboard' ? 'bg-gray-800' : 'hover:bg-gray-800'; ?>">
+                <i class="fas fa-home mr-3"></i>
+                Dashboard
             </a>
-            <a href="#" class="flex items-center space-x-2 hover:bg-gray-700 p-3 rounded-lg transition">
-                <i class="fas fa-users"></i>
-                <span>Utilisateurs</span>
+            <a href="?page=courses" class="flex items-center px-6 py-3 text-gray-300 <?= $page === 'courses' ? 'bg-gray-800' : 'hover:bg-gray-800'; ?>">
+                <i class="fas fa-book mr-3"></i>
+                Courses
             </a>
-            <a href="#" class="flex items-center space-x-2 hover:bg-gray-700 p-3 rounded-lg transition">
-                <i class="fas fa-briefcase"></i>
-                <span>Offres d'emploi</span>
+            <a href="?page=users" class="flex items-center px-6 py-3 text-gray-300 <?= $page === 'users' ? 'bg-gray-800' : 'hover:bg-gray-800'; ?>">
+                <i class="fas fa-users mr-3"></i>
+                Users
             </a>
-            <a href="#" class="flex items-center space-x-2 hover:bg-gray-700 p-3 rounded-lg transition">
-                <i class="fas fa-building"></i>
-                <span>Entreprises</span>
-            </a>
-            <a href="#" class="flex items-center space-x-2 hover:bg-gray-700 p-3 rounded-lg transition">
-                <i class="fas fa-tags"></i>
-                <span>Catégories</span>
-            </a>
-            <a href="#" class="flex items-center space-x-2 hover:bg-gray-700 p-3 rounded-lg transition">
-                <i class="fas fa-cog"></i>
-                <span>Paramètres</span>
+            <a href="?page=categories" class="flex items-center px-6 py-3 text-gray-300 <?= $page === 'categories' ? 'bg-gray-800' : 'hover:bg-gray-800'; ?>">
+                <i class="fas fa-tags mr-3"></i>
+                Categories
             </a>
         </nav>
-    </aside>
+    </div>
 
     <!-- Main Content -->
-    <main class="ml-64 p-8">
-        <!-- Top Bar -->
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-2xl font-bold">Tableau de bord</h1>
-            <div class="flex items-center space-x-4">
-                <div class="relative">
-                    <i class="fas fa-bell text-gray-500 text-xl"></i>
-                    <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">3</span>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <img src="../../public/assets/admin.jpg" alt="Admin" class="w-10 h-10 rounded-full">
-                    <span class="font-semibold">Admin</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Stats Cards -->
+    <div class="ml-64 p-8">
+        <?php if ($page === 'dashboard'): ?>
+        <!-- Dashboard Section -->
+        <h2 class="text-2xl font-bold mb-6">Dashboard</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-gray-500">Total Utilisateurs</h3>
-                    <i class="fas fa-users text-blue-500 text-2xl"></i>
-                </div>
-                <p class="text-3xl font-bold">12,845</p>
-                <p class="text-green-500 text-sm mt-2">
-                    <i class="fas fa-arrow-up"></i> +12% ce mois
-                </p>
-            </div>
-
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-gray-500">Offres Actives</h3>
-                    <i class="fas fa-briefcase text-blue-500 text-2xl"></i>
-                </div>
-                <p class="text-3xl font-bold">3,426</p>
-                <p class="text-green-500 text-sm mt-2">
-                    <i class="fas fa-arrow-up"></i> +8% ce mois
-                </p>
-            </div>
-
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-gray-500">Entreprises</h3>
-                    <i class="fas fa-building text-blue-500 text-2xl"></i>
-                </div>
-                <p class="text-3xl font-bold">1,245</p>
-                <p class="text-green-500 text-sm mt-2">
-                    <i class="fas fa-arrow-up"></i> +5% ce mois
-                </p>
-            </div>
-
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-gray-500">Candidatures</h3>
-                    <i class="fas fa-file-alt text-blue-500 text-2xl"></i>
-                </div>
-                <p class="text-3xl font-bold">8,742</p>
-                <p class="text-green-500 text-sm mt-2">
-                    <i class="fas fa-arrow-up"></i> +15% ce mois
-                </p>
-            </div>
-        </div>
-
-        <!-- Recent Activity & Chart Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <!-- Recent Activity -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-xl font-semibold mb-4">Activités Récentes</h3>
-                <div class="space-y-4">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                            <i class="fas fa-plus text-blue-500"></i>
-                        </div>
-                        <div>
-                            <p class="font-semibold">Nouvelle offre d'emploi</p>
-                            <p class="text-sm text-gray-500">TechCorp a publié une nouvelle offre</p>
-                            <p class="text-xs text-gray-400">Il y a 2 heures</p>
-                        </div>
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-500">
+                        <i class="fas fa-users text-2xl"></i>
                     </div>
-
-                    <div class="flex items-center space-x-4">
-                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                            <i class="fas fa-user text-green-500"></i>
-                        </div>
-                        <div>
-                            <p class="font-semibold">Nouvel utilisateur</p>
-                            <p class="text-sm text-gray-500">Jean Dupont s'est inscrit</p>
-                            <p class="text-xs text-gray-400">Il y a 3 heures</p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center space-x-4">
-                        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
-                            <i class="fas fa-edit text-yellow-500"></i>
-                        </div>
-                        <div>
-                            <p class="font-semibold">Offre modifiée</p>
-                            <p class="text-sm text-gray-500">DesignCo a mis à jour son offre</p>
-                            <p class="text-xs text-gray-400">Il y a 5 heures</p>
-                        </div>
+                    <div class="ml-4">
+                        <h4 class="text-gray-500 text-sm">Total Students</h4>
+                        <h3 class="text-2xl font-bold"><?= number_format($stats['total_students']); ?></h3>
                     </div>
                 </div>
             </div>
-
-            <!-- Latest Jobs -->
             <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-xl font-semibold mb-4">Dernières Offres d'Emploi</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead>
-                            <tr class="border-b">
-                                <th class="text-left py-2">Poste</th>
-                                <th class="text-left py-2">Entreprise</th>
-                                <th class="text-left py-2">Statut</th>
-                                <th class="text-left py-2">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="border-b">
-                                <td class="py-2">Développeur Full Stack</td>
-                                <td>TechCorp</td>
-                                <td><span class="px-2 py-1 bg-green-100 text-green-600 rounded-full text-sm">Active</span></td>
-                                <td class="space-x-2">
-                                    <button class="text-blue-500"><i class="fas fa-edit"></i></button>
-                                    <button class="text-red-500"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
-                            <tr class="border-b">
-                                <td class="py-2">UX Designer</td>
-                                <td>DesignCo</td>
-                                <td><span class="px-2 py-1 bg-yellow-100 text-yellow-600 rounded-full text-sm">En attente</span></td>
-                                <td class="space-x-2">
-                                    <button class="text-blue-500"><i class="fas fa-edit"></i></button>
-                                    <button class="text-red-500"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="py-2">Chef de Projet</td>
-                                <td>ProManage</td>
-                                <td><span class="px-2 py-1 bg-green-100 text-green-600 rounded-full text-sm">Active</span></td>
-                                <td class="space-x-2">
-                                    <button class="text-blue-500"><i class="fas fa-edit"></i></button>
-                                    <button class="text-red-500"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-500">
+                        <i class="fas fa-book text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h4 class="text-gray-500 text-sm">Total Courses</h4>
+                        <h3 class="text-2xl font-bold"><?= number_format($stats['total_courses']); ?></h3>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-100 text-yellow-500">
+                        <i class="fas fa-chalkboard-teacher text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h4 class="text-gray-500 text-sm">Total Teachers</h4>
+                        <h3 class="text-2xl font-bold"><?= number_format($stats['total_teachers']); ?></h3>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-100 text-purple-500">
+                        <i class="fas fa-user-graduate text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h4 class="text-gray-500 text-sm">Total Enrollments</h4>
+                        <h3 class="text-2xl font-bold"><?= number_format($stats['total_enrollments']); ?></h3>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- Categories and Tags Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Categories -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-semibold">Catégories</h3>
-                    <button class="text-blue-500">Voir tout</button>
-                </div>
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-laptop-code text-blue-500"></i>
-                            <span>Développement</span>
-                        </div>
-                        <span class="text-gray-500">450 offres</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-paint-brush text-purple-500"></i>
-                            <span>Design</span>
-                        </div>
-                        <span class="text-gray-500">280 offres</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-chart-line text-green-500"></i>
-                            <span>Marketing</span>
-                        </div>
-                        <span class="text-gray-500">320 offres</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Popular Tags -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-semibold">Tags Populaires</h3>
-                    <button class="text-blue-500">Gérer les tags</button>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                    <span class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">#javascript</span>
-                    <span class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">#react</span>
-                    <span class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">#python</span>
-                    <span class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">#design</span>
-                    <span class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">#ui/ux</span>
-                    <span class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">#marketing</span>
-                    <span class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">#seo</span>
-                    <span class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">#nodejs</span>
-                </div>
-            </div>
+        <?php elseif ($page === 'courses'): ?>
+        <!-- Courses Section -->
+        <h2 class="text-2xl font-bold mb-6">Courses Management</h2>
+        <?php
+        $stmt = $pdo->query("
+            SELECT c.*, u.firstName, u.lastName, cat.name as category_name
+            FROM Courses c
+            LEFT JOIN user u ON c.teacher_id = u.id
+            LEFT JOIN Category cat ON c.category_id = cat.category_id
+            ORDER BY c.created_at DESC
+        ");
+        $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        ?>
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Teacher</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <?php foreach ($courses as $course): ?>
+                    <tr>
+                        <td class="px-6 py-4"><?= htmlspecialchars($course['title']); ?></td>
+                        <td class="px-6 py-4"><?= htmlspecialchars($course['firstName'] . ' ' . $course['lastName']); ?></td>
+                        <td class="px-6 py-4"><?= htmlspecialchars($course['category_name']); ?></td>
+                        <td class="px-6 py-4">
+                            <button class="text-blue-600 hover:text-blue-900">Edit</button>
+                            <button class="text-red-600 hover:text-red-900">Delete</button>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
-    </main>
+        <?php elseif ($page === 'users'): ?>
+        <!-- Users Section -->
+        <h2 class="text-2xl font-bold mb-6">Users Management</h2>
+        <?php
+        $stmt = $pdo->query("
+            SELECT u.*, r.title as role_title
+            FROM user u
+            LEFT JOIN role r ON u.role_id = r.role_id
+        ");
+        $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        ?>
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <?php foreach ($users as $user): ?>
+                    <tr>
+                        <td class="px-6 py-4"><?= htmlspecialchars($user['firstName'] . ' ' . $user['lastName']); ?></td>
+                        <td class="px-6 py-4"><?= htmlspecialchars($user['email']); ?></td>
+                        <td class="px-6 py-4"><?= htmlspecialchars($user['role_title']); ?></td>
+                        <td class="px-6 py-4"><?= htmlspecialchars($user['statut']); ?></td>
+                        <td class="px-6 py-4">
+                            <button class="text-blue-600 hover:text-blue-900">Edit</button>
+                            <button class="text-red-600 hover:text-red-900">Delete</button>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php endif; ?>
+    </div>
 </body>
 </html>

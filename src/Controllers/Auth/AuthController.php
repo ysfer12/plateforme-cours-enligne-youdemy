@@ -9,9 +9,9 @@ use PDO;
 session_start(); // Start the session
 
 class AuthController {
-    public function login($email, $mot_de_pass) {
+    public function login($email, $password) {
         $userModel = new UserModel();
-        $user = $userModel->findUserByEmailAndPassword($email, $mot_de_pass);
+        $user = $userModel->findUserByEmailAndPassword($email, $password);
 
         if ($user == null) {
             echo "User not found or invalid password. Please check your credentials.";
@@ -46,7 +46,14 @@ class AuthController {
             echo "Role not found for the user.";
         }
     }
-
+    public function logout() {
+        // Destroy the session
+        session_unset();
+        session_destroy();
+        // Redirect to login page
+        header("Location: ../Auth/login.php");
+        exit();
+    }
     public function register($firstname, $lastname, $email, $password, $role) {
         $userModel = new UserModel();
         $userModel->register($firstname, $lastname, $email, $password, $role);
