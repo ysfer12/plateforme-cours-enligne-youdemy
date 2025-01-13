@@ -54,8 +54,8 @@ class AuthController {
         header("Location: ../Auth/login.php");
         exit();
     }
-    public function register($firstname, $lastname, $email, $password, $role) {
+    public function register($firstname, $lastname, $email, $password, $role, $status) {
         $userModel = new UserModel();
-        $userModel->register($firstname, $lastname, $email, $password, $role);
+        $userModel->register($firstname, $lastname, $email, $password, $role, $status);
     }
 }

@@ -46,6 +46,7 @@ class UserModel {
             );
         }
     }
+
     public function logout() {
         session_destroy();
         header("Location: ../login.php");
@@ -53,7 +54,7 @@ class UserModel {
 
     public function register($firstname, $lastname, $email, $password, $roleTitle) {
         // Fetch the role ID based on the role title
-        $roleQuery = "SELECT id_role FROM role WHERE titre = :roleTitle";
+        $roleQuery = "SELECT role_id FROM role WHERE title = :roleTitle";
         $roleStmt = $this->conn->prepare($roleQuery);
         $roleStmt->bindParam(":roleTitle", $roleTitle);
         $roleStmt->execute();
@@ -62,17 +63,21 @@ class UserModel {
         if (!$roleRow) {
             throw new \Exception("Role not found");
         }
-        $roleId = $roleRow['id_role'];
+        $roleId = $roleRow['role_id'];
+        
+        // Determine the status based on the role title
+        $statut = ($roleTitle === 'student') ? 'isActive' : 'isNotActive';
         
         // Insert the new user into the database
-        $query = "INSERT INTO utilisateur (prenom, nom, email, mot_de_pass, id_role, statut) 
-                  VALUES (:firstname, :lastname, :email, :password, :roleId, 'isNotActive')"; // Default status: 'isNotActive'
+        $query = "INSERT INTO user (firstName, lastName, email, password, role_id, statut) 
+                  VALUES (:firstname, :lastname, :email, :password, :roleId, :statut)";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":firstname", $firstname);
         $stmt->bindParam(":lastname", $lastname);
         $stmt->bindParam(":email", $email);
         $stmt->bindParam(":password", $password);
         $stmt->bindParam(":roleId", $roleId);
+        $stmt->bindParam(":statut", $statut);
         
         try {
             $stmt->execute();

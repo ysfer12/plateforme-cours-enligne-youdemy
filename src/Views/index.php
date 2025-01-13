@@ -64,7 +64,7 @@
                 <!-- Navigation Links with Better Styling -->
                 <div class="flex items-center space-x-8">
                     <div class="hidden md:flex items-center space-x-6">
-                        <a href="#" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
+                        <a href="../Views/Courses/Courses.php" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
                             <i class="fas fa-book-open text-sm"></i>
                             <span>Catalogue</span>
                         </a>
