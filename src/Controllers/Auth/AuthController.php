@@ -1,7 +1,7 @@
 <?php
 namespace App\Controllers\Auth;
 
-use App\Classes\Utilisateur;
+use App\Classes\User;
 use App\Config\Database;
 use App\Models\UserModel;
 use PDO;
@@ -26,13 +26,13 @@ class AuthController {
         $role = $user->getRole();
         if ($role) {
             switch ($role->getTitle()) {
-                case "Administrateur":
+                case "admin":
                     header("Location: ../admin/dashboard.php");
                     break;
-                case "Candidat":
+                case "teacher":
                     header("Location: ../candidate/home.php");
                     break;
-                case "Recruteur":
+                case "student":
                     header("Location: ../recruiter/home.php");
                     break;
                 default:

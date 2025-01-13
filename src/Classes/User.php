@@ -10,17 +10,17 @@ class User {
     public $email;
     public $password;
     public $role;
-    public $status;
+    public $statut;
 
     
-    public function __construct($id,$firstName,$lastName, $email,$password='',$role,$status) {
+    public function __construct($id,$firstName,$lastName, $email,$password='',$role,$statut) {
             $this->id = $id;
             $this->firstName = $firstName;
             $this->lastName = $lastName;
             $this->email = $email;
             $this->password = $password;
             $this->role = $role;
-            $this->status=$status;
+            $this->statut=$statut;
     }
 
 
@@ -30,6 +30,6 @@ class User {
     public function getEmail() { return $this->email; }
     public function getPassword() { return $this->password; }
     public function getRole() { return $this->role; } 
-    public function getStatus() { return $this->status; }    
+    public function getStatut() { return $this->statut; }    
    
 }

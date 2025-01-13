@@ -2,7 +2,7 @@
 namespace App\Models;
 
 use App\Classes\Role;
-use App\Classes\Utilisateur;
+use App\Classes\User;
 use App\Config\Database;
 use PDO;
 
@@ -14,37 +14,35 @@ class UserModel {
         $this->conn = $db->connection();
     }
 
-    public function findUserByEmailAndPassword($email, $mot_de_pass) {
+    public function findUserByEmailAndPassword($email, $password) {
         // Updated query to include the `statut` column
-        $query = "SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, 
-                         utilisateur.mot_de_pass, utilisateur.statut, 
-                         role.id_role as role_id, role.titre as `role`
-                  FROM utilisateur
-                  JOIN role ON role.id_role = utilisateur.id_role
-                  WHERE utilisateur.email = :email AND utilisateur.mot_de_pass = :password";
+        $query = "SELECT user.id, user.firstName, user.lastName, user.email, 
+                         user.password, user.statut, 
+                         role.role_id as role_id, role.title as `role`
+                  FROM user
+                  JOIN role ON role.role_id = user.role_id
+                  WHERE user.email = :email AND user.password = :password";
         
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":email", $email);
-        $stmt->bindParam(":password", $mot_de_pass);
+        $stmt->bindParam(":password", $password);
         $stmt->execute();
         
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if (!$row) {
-            return null; // User not found or password mismatch
+            return null; 
         } else {
-            // Create a Role object
             $role = new Role($row["role_id"], $row["role"]);
             
-            // Create and return a Utilisateur object with the `statut` value
-            return new Utilisateur(
+            return new User(
                 $row['id'],
-                $row["prenom"],
-                $row["nom"],
+                $row["firstName"],
+                $row["lastName"],
                 $row["email"],
+                $row["password"],
                 $role,
-                $row["mot_de_pass"],
-                $row["statut"] // Include the `statut` value
+                $row["statut"] 
             );
         }
     }

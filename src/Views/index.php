@@ -89,13 +89,12 @@
                         </div>
                     </div>
                     <div class="flex items-center space-x-3">
-                        <button class="px-4 py-2 text-blue-600 rounded-lg hover:bg-blue-50 transition">
-                            Connexion
-                        </button>
-                        <button class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
-                            Inscription
-                        </button>
-                    </div>
+                    <a href="../Views/Auth/login.php" target="_blank" class="px-4 py-2 text-blue-600 rounded-lg hover:bg-blue-50 transition">
+                        Connexion
+                    </a>
+                    <a href="/platforme-youdemy/src/Views/Auth/register.php" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
+                        Inscription
+                    </a>
                 </div>
             </div>
         </div>
