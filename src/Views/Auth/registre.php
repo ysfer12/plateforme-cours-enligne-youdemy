@@ -11,14 +11,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $password = $_POST['password'];
     $role = $_POST['roleTitle'];
-
+    $status = 'isActive';
     $authController = new AuthController();
-    try {
-        $authController->register($firstname, $lastname, $email, $password, $role);
-        echo "Registration successful!";
-    } catch (Exception $e) {
-        echo "Error: " . $e->getMessage();
-    }
+    $authController->register($firstname, $lastname, $email, $password, $role, $status);
 }
 ?>
 <!DOCTYPE html>
@@ -77,28 +72,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
                             placeholder="••••••••">
                     </div>
-<!-- 
-                    Role Selection 
+
+                    <!-- Role Title -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
-                        <select name="role" id="role" required
-                            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all appearance-none">
-                            <option value="">Sélectionnez un rôle</option>
-                            <option value="candidate">Candidat</option>
-                            <option value="recruiter">Recruteur</option>
-                            <option value="admin">Administrateur</option>
-                        </select>
-                    </div> -->
-
-                <!-- Role Title -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Role Title</label>
-                <input type="text" name="roleTitle" id="roleTitle" required
-                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
-                    placeholder="Role Title">
-            </div>
-
-
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Role Title</label>
+                        <input type="text" name="roleTitle" id="roleTitle" required
+                            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
+                            placeholder="Role Title">
+                    </div>
 
                     <!-- Terms Checkbox -->
                     <div class="flex items-start space-x-2">

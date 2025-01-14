@@ -1,6 +1,12 @@
 <?php
-require_once '../../../vendor/autoload.php';
-use App\Controllers\OffreController;
+require_once("../../../vendor/autoload.php");
+use App\Controllers\Auth\AuthController;
+session_start();
+
+// if (!isset($_SESSION['user_id'])) {
+//     header("Location: ../Auth/login.php");
+//     exit();
+// }
 
 if($_SERVER["REQUEST_METHOD"] == "POST")
 {
@@ -19,6 +25,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST")
         $offre = new OffreController();
         $offre->create($titre, $description, $salaire, $localisation, $categorie, $tag, $date_publication);
     }
+}
+
+if (isset($_POST["submit1"])) {
+    $authController = new AuthController();
+    $authController->logout();
 }
 ?>
 
@@ -90,9 +101,12 @@ if($_SERVER["REQUEST_METHOD"] == "POST")
             <button id="openModalBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center">
                 <i class="fas fa-plus mr-2"></i> Publier une offre
             </button>
-            <button id="openModalBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center">
+            <form action="" method="POST">
+            <button type="submit1" name="submit1" value="2"
+            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center">
                 <i class="fas fa-plus mr-2"></i> Logout
             </button>
+            </form>
             <div class="relative">
                 <i class="fas fa-bell text-gray-500 text-xl cursor-pointer"></i>
                 <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">5</span>

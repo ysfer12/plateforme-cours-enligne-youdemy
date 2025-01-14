@@ -4,14 +4,14 @@ namespace App\Classes;
 
 class Role {
     private $id;
-    private $title;
+    private $titre;
 
-    public function __construct($id, $title) {
+    public function __construct($id, $titre) {
         $this->id = $id;
-        $this->title = $title;
+        $this->titre = $titre;
     }
 
-    public function getTitle() {
-        return $this->title;
+    public function getTitre() {
+        return $this->titre;
     }
 }
