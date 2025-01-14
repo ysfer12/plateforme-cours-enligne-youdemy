@@ -2,6 +2,7 @@
 require_once '../../../vendor/autoload.php';
 use App\Controllers\TagsController;
 
+
 // Check admin session
 // session_start();
 // if (!isset($_SESSION['admin_id'])) {
@@ -84,54 +85,59 @@ $tags = $tagsController->getTags();
 <body class="bg-gray-50">
     <div class="min-h-screen flex">
         <!-- Sidebar -->
+        <!-- Sidebar -->
         <aside class="fixed w-64 h-full bg-gray-800 text-white shadow-xl z-10">
-            <!-- En-tête Sidebar -->
             <div class="p-6 border-b border-gray-700">
                 <div class="flex items-center space-x-3">
-                    <i data-lucide="book-open" class="w-8 h-8 text-blue-500"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-white">
+                         <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                         <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                </svg>
                     <h1 class="text-2xl font-bold">Youdemy</h1>
                 </div>
                 <p class="text-gray-400 text-sm mt-1">Interface Administrateur</p>
             </div>
 
-            <!-- Profil Admin -->
-            <div class="p-4">
-                <div class="flex items-center space-x-3 bg-gray-700/50 rounded-lg p-3 mb-4">
-                    <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
-                        <i data-lucide="user" class="w-6 h-6"></i>
-                    </div>
-                    <div>
-                        <p class="font-medium"><?php echo htmlspecialchars($_SESSION['admin_name'] ?? 'Admin'); ?></p>
-                        <p class="text-sm text-gray-400">Super Admin</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Navigation -->
-            <nav class="mt-2">
-                <a href="dashboard.php" class="tab w-full flex items-center p-4 hover:bg-gray-700 transition-colors">
-                    <i data-lucide="bar-chart-2" class="mr-3 w-5 h-5"></i>
-                    <span>Statistiques</span>
+            <nav class="mt-6">
+                <a href="dashboard.php" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3">
+                        <rect x="3" y="3" width="7" height="7"/>
+                        <rect x="14" y="3" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+                    Dashboard
                 </a>
-                <a href="Utilisateurs.php" class="tab w-full flex items-center p-4 hover:bg-gray-700 transition-colors">
-                    <i data-lucide="users" class="mr-3 w-5 h-5"></i>
-                    <span>Utilisateurs</span>
+                <a href="Utilisateurs.php" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    Utilisateurs
                 </a>
-                <a href="Tags.php" class="tab w-full flex items-center p-4 hover:bg-gray-700 transition-colors active">
-                    <i data-lucide="tag" class="mr-3 w-5 h-5"></i>
-                    <span>Tags</span>
+                <a href="Tags.php" class="flex items-center px-6 py-3 bg-gray-700 text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                        <line x1="7" y1="7" x2="7.01" y2="7"/>
+                    </svg>
+                    Tags
                 </a>
-                <a href="Categories.php" class="tab w-full flex items-center p-4 hover:bg-gray-700 transition-colors">
-                    <i data-lucide="folder-tree" class="mr-3 w-5 h-5"></i>
-                    <span>Catégories</span>
+                <a href="Categories.php" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3">
+                        <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/>
+                    </svg>
+                    Catégories
                 </a>
             </nav>
 
-            <!-- Bouton Déconnexion -->
             <div class="absolute bottom-0 w-full p-4 border-t border-gray-700">
-                <a href="logout.php" class="w-full flex items-center justify-center space-x-2 text-gray-400 hover:text-white transition-colors">
-                    <i data-lucide="log-out" class="w-5 h-5"></i>
-                    <span>Déconnexion</span>
+                <a href="logout.php" class="flex items-center text-gray-300 hover:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    Déconnexion
                 </a>
             </div>
         </aside>
