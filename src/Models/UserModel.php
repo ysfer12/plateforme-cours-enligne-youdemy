@@ -66,7 +66,7 @@ class UserModel {
         $roleId = $roleRow['role_id'];
         
         // Determine the status based on the role title
-        $statut = ($roleTitle === 'student') ? 'isActive' : 'isNotActive';
+        $statut = ($roleTitle === 'student') ? 'isActive' : 'isNotActive';//ternary operator
         
         // Insert the new user into the database
         $query = "INSERT INTO user (firstName, lastName, email, password, role_id, statut) 

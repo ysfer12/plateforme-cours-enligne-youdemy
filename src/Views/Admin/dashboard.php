@@ -1,183 +1,531 @@
-<?php
-require_once("../../../vendor/autoload.php");
-use App\Config\Database;
-$db = new Database();
-$pdo = $db->connection();
-
-// Détection de la page active
-$page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
-
-// Fetch dashboard statistics
-$stats = [
-    'total_students' => $pdo->query("SELECT COUNT(*) FROM user u JOIN role r ON u.role_id = r.role_id WHERE r.title = 'student'")->fetchColumn(),
-    'total_courses' => $pdo->query("SELECT COUNT(*) FROM Courses")->fetchColumn(),
-    'total_teachers' => $pdo->query("SELECT COUNT(*) FROM user u JOIN role r ON u.role_id = r.role_id WHERE r.title = 'teacher'")->fetchColumn(),
-    'total_enrollments' => $pdo->query("SELECT COUNT(*) FROM Enrollments")->fetchColumn()
-];
-?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouDemy Admin Dashboard</title>
+    <title>Youdemy Admin Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .tab.active {
+            background-color: rgb(55 65 81);
+            border-left: 4px solid rgb(59 130 246);
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
-    <!-- Sidebar -->
-    <div class="fixed inset-y-0 left-0 w-64 bg-gray-900 text-white">
-        <div class="p-6">
-            <h1 class="text-2xl font-bold">YouDemy Admin</h1>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex">
+        <!-- Sidebar -->
+        <aside class="fixed w-64 h-full bg-gray-800 text-white shadow-xl z-10">
+            <!-- En-tête Sidebar -->
+            <div class="p-6 border-b border-gray-700">
+                <div class="flex items-center space-x-3">
+                    <i data-lucide="book-open" class="w-8 h-8 text-blue-500"></i>
+                    <h1 class="text-2xl font-bold">Youdemy</h1>
+                </div>
+                <p class="text-gray-400 text-sm mt-1">Interface Administrateur</p>
+            </div>
+
+            <!-- Profil Admin -->
+            <div class="p-4">
+                <div class="flex items-center space-x-3 bg-gray-700/50 rounded-lg p-3 mb-4">
+                    <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
+                        <i data-lucide="user" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium">Admin User</p>
+                        <p class="text-sm text-gray-400">Super Admin</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="mt-2">
+                <button onclick="switchSection('stats')" class="tab w-full flex items-center p-4 hover:bg-gray-700 transition-colors active">
+                    <i data-lucide="bar-chart-2" class="mr-3 w-5 h-5"></i>
+                    <span>Statistiques</span>
+                </button>
+                <button onclick="switchSection('users')" class="tab w-full flex items-center p-4 hover:bg-gray-700 transition-colors">
+                    <i data-lucide="users" class="mr-3 w-5 h-5"></i>
+                    <span>Utilisateurs</span>
+                </button>
+                <button onclick="switchSection('tags')" class="tab w-full flex items-center p-4 hover:bg-gray-700 transition-colors">
+                    <i data-lucide="tag" class="mr-3 w-5 h-5"></i>
+                    <span>Tags</span>
+                </button>
+                <button onclick="switchSection('categories')" class="tab w-full flex items-center p-4 hover:bg-gray-700 transition-colors">
+                    <i data-lucide="folder-tree" class="mr-3 w-5 h-5"></i>
+                    <span>Catégories</span>
+                </button>
+            </nav>
+
+            <!-- Bouton Déconnexion -->
+            <div class="absolute bottom-0 w-full p-4 border-t border-gray-700">
+                <button class="w-full flex items-center justify-center space-x-2 text-gray-400 hover:text-white transition-colors">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                    <span>Déconnexion</span>
+                </button>
+            </div>
+        </aside>
+        <!-- Main Content -->
+<main class="ml-64 flex-1 p-8">
+    <!-- Statistics Section -->
+    <section id="stats" class="section active">
+        <!-- En-tête de section -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-800">Tableau de bord</h2>
+                <p class="text-gray-600 mt-1">Vue d'ensemble des statistiques</p>
+            </div>
+            <div class="flex space-x-3">
+                <button class="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow hover:shadow-md transition-all">
+                    <i data-lucide="download" class="w-5 h-5 text-gray-600"></i>
+                    <span>Exporter</span>
+                </button>
+            </div>
         </div>
-        <nav class="mt-6">
-            <a href="?page=dashboard" class="flex items-center px-6 py-3 text-gray-100 <?= $page === 'dashboard' ? 'bg-gray-800' : 'hover:bg-gray-800'; ?>">
-                <i class="fas fa-home mr-3"></i>
-                Dashboard
-            </a>
-            <a href="?page=courses" class="flex items-center px-6 py-3 text-gray-300 <?= $page === 'courses' ? 'bg-gray-800' : 'hover:bg-gray-800'; ?>">
-                <i class="fas fa-book mr-3"></i>
-                Courses
-            </a>
-            <a href="?page=users" class="flex items-center px-6 py-3 text-gray-300 <?= $page === 'users' ? 'bg-gray-800' : 'hover:bg-gray-800'; ?>">
-                <i class="fas fa-users mr-3"></i>
-                Users
-            </a>
-            <a href="?page=categories" class="flex items-center px-6 py-3 text-gray-300 <?= $page === 'categories' ? 'bg-gray-800' : 'hover:bg-gray-800'; ?>">
-                <i class="fas fa-tags mr-3"></i>
-                Categories
-            </a>
-        </nav>
+
+        <!-- Cartes statistiques -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Carte Étudiants -->
+            <div class="stat-card bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all">
+                <div class="flex items-center justify-between">
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="graduation-cap" class="w-6 h-6 text-blue-500"></i>
+                    </div>
+                    <span class="text-sm font-medium text-green-500 bg-green-100 px-2 py-1 rounded">+12%</span>
+                </div>
+                <h3 class="text-2xl font-bold mt-4">1,250</h3>
+                <p class="text-gray-600">Étudiants actifs</p>
+                <div class="mt-4 flex items-center text-sm text-gray-500">
+                    <i data-lucide="trending-up" class="w-4 h-4 mr-1 text-green-500"></i>
+                    <span>+8% ce mois</span>
+                </div>
+            </div>
+
+            <!-- Carte Enseignants -->
+            <div class="stat-card bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all">
+                <div class="flex items-center justify-between">
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="users" class="w-6 h-6 text-purple-500"></i>
+                    </div>
+                    <span class="text-sm font-medium text-green-500 bg-green-100 px-2 py-1 rounded">+5%</span>
+                </div>
+                <h3 class="text-2xl font-bold mt-4">48</h3>
+                <p class="text-gray-600">Enseignants</p>
+                <div class="mt-4 flex items-center text-sm text-gray-500">
+                    <i data-lucide="trending-up" class="w-4 h-4 mr-1 text-green-500"></i>
+                    <span>+3% ce mois</span>
+                </div>
+            </div>
+
+            <!-- Carte Cours -->
+            <div class="stat-card bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all">
+                <div class="flex items-center justify-between">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="book-open" class="w-6 h-6 text-yellow-500"></i>
+                    </div>
+                    <span class="text-sm font-medium text-green-500 bg-green-100 px-2 py-1 rounded">+15%</span>
+                </div>
+                <h3 class="text-2xl font-bold mt-4">156</h3>
+                <p class="text-gray-600">Cours publiés</p>
+                <div class="mt-4 flex items-center text-sm text-gray-500">
+                    <i data-lucide="trending-up" class="w-4 h-4 mr-1 text-green-500"></i>
+                    <span>+12% ce mois</span>
+                </div>
+            </div>
+
+            <!-- Carte Revenus -->
+            <div class="stat-card bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all">
+                <div class="flex items-center justify-between">
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="euro" class="w-6 h-6 text-green-500"></i>
+                    </div>
+                    <span class="text-sm font-medium text-green-500 bg-green-100 px-2 py-1 rounded">+20%</span>
+                </div>
+                <h3 class="text-2xl font-bold mt-4">45,000€</h3>
+                <p class="text-gray-600">Revenu mensuel</p>
+                <div class="mt-4 flex items-center text-sm text-gray-500">
+                    <i data-lucide="trending-up" class="w-4 h-4 mr-1 text-green-500"></i>
+                    <span>+18% ce mois</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activité récente -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="text-lg font-bold mb-4">Activité récente</h3>
+            <div class="space-y-4">
+                <div class="flex items-center space-x-4">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="user-plus" class="w-5 h-5 text-blue-500"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-medium">Nouvel étudiant inscrit</p>
+                        <p class="text-sm text-gray-500">Marie Dubois s'est inscrite au cours de JavaScript</p>
+                    </div>
+                    <span class="text-sm text-gray-500">Il y a 2h</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="book" class="w-5 h-5 text-green-500"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-medium">Nouveau cours publié</p>
+                        <p class="text-sm text-gray-500">React.js Avancé par Pierre Martin</p>
+                    </div>
+                    <span class="text-sm text-gray-500">Il y a 4h</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Users Management Section -->
+<section id="users" class="section">
+    <!-- En-tête de section -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-3xl font-bold text-gray-800">Gestion des Utilisateurs</h2>
+            <p class="text-gray-600 mt-1">Administration des comptes étudiants et enseignants</p>
+        </div>
+        <button class="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+            <i data-lucide="plus" class="w-5 h-5"></i>
+            <span>Ajouter un utilisateur</span>
+        </button>
     </div>
 
-    <!-- Main Content -->
-    <div class="ml-64 p-8">
-        <?php if ($page === 'dashboard'): ?>
-        <!-- Dashboard Section -->
-        <h2 class="text-2xl font-bold mb-6">Dashboard</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-blue-100 text-blue-500">
-                        <i class="fas fa-users text-2xl"></i>
-                    </div>
-                    <div class="ml-4">
-                        <h4 class="text-gray-500 text-sm">Total Students</h4>
-                        <h3 class="text-2xl font-bold"><?= number_format($stats['total_students']); ?></h3>
+    <!-- Table Container -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <!-- Search and Filter Bar -->
+        <div class="p-6 border-b">
+            <div class="flex items-center space-x-4">
+                <div class="flex-1">
+                    <div class="relative">
+                        <i data-lucide="search" class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                        <input type="text" placeholder="Rechercher un utilisateur..." 
+                               class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
                     </div>
                 </div>
-            </div>
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-green-100 text-green-500">
-                        <i class="fas fa-book text-2xl"></i>
-                    </div>
-                    <div class="ml-4">
-                        <h4 class="text-gray-500 text-sm">Total Courses</h4>
-                        <h3 class="text-2xl font-bold"><?= number_format($stats['total_courses']); ?></h3>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-yellow-100 text-yellow-500">
-                        <i class="fas fa-chalkboard-teacher text-2xl"></i>
-                    </div>
-                    <div class="ml-4">
-                        <h4 class="text-gray-500 text-sm">Total Teachers</h4>
-                        <h3 class="text-2xl font-bold"><?= number_format($stats['total_teachers']); ?></h3>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-purple-100 text-purple-500">
-                        <i class="fas fa-user-graduate text-2xl"></i>
-                    </div>
-                    <div class="ml-4">
-                        <h4 class="text-gray-500 text-sm">Total Enrollments</h4>
-                        <h3 class="text-2xl font-bold"><?= number_format($stats['total_enrollments']); ?></h3>
-                    </div>
-                </div>
+                <select class="border rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500">
+                    <option>Tous les rôles</option>
+                    <option>Étudiants</option>
+                    <option>Enseignants</option>
+                </select>
             </div>
         </div>
-        <?php elseif ($page === 'courses'): ?>
-        <!-- Courses Section -->
-        <h2 class="text-2xl font-bold mb-6">Courses Management</h2>
-        <?php
-        $stmt = $pdo->query("
-            SELECT c.*, u.firstName, u.lastName, cat.name as category_name
-            FROM Courses c
-            LEFT JOIN user u ON c.teacher_id = u.id
-            LEFT JOIN Category cat ON c.category_id = cat.category_id
-            ORDER BY c.created_at DESC
-        ");
-        $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        ?>
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <table class="w-full">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Teacher</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    <?php foreach ($courses as $course): ?>
-                    <tr>
-                        <td class="px-6 py-4"><?= htmlspecialchars($course['title']); ?></td>
-                        <td class="px-6 py-4"><?= htmlspecialchars($course['firstName'] . ' ' . $course['lastName']); ?></td>
-                        <td class="px-6 py-4"><?= htmlspecialchars($course['category_name']); ?></td>
-                        <td class="px-6 py-4">
-                            <button class="text-blue-600 hover:text-blue-900">Edit</button>
-                            <button class="text-red-600 hover:text-red-900">Delete</button>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-        <?php elseif ($page === 'users'): ?>
-        <!-- Users Section -->
-        <h2 class="text-2xl font-bold mb-6">Users Management</h2>
-        <?php
-        $stmt = $pdo->query("
-            SELECT u.*, r.title as role_title
-            FROM user u
-            LEFT JOIN role r ON u.role_id = r.role_id
-        ");
-        $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        ?>
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <table class="w-full">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    <?php foreach ($users as $user): ?>
-                    <tr>
-                        <td class="px-6 py-4"><?= htmlspecialchars($user['firstName'] . ' ' . $user['lastName']); ?></td>
-                        <td class="px-6 py-4"><?= htmlspecialchars($user['email']); ?></td>
-                        <td class="px-6 py-4"><?= htmlspecialchars($user['role_title']); ?></td>
-                        <td class="px-6 py-4"><?= htmlspecialchars($user['statut']); ?></td>
-                        <td class="px-6 py-4">
-                            <button class="text-blue-600 hover:text-blue-900">Edit</button>
-                            <button class="text-red-600 hover:text-red-900">Delete</button>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-        <?php endif; ?>
+
+        <!-- Users Table -->
+        <table class="w-full">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="text-left p-4 font-medium text-gray-600">Utilisateur</th>
+                    <th class="text-left p-4 font-medium text-gray-600">Rôle</th>
+                    <th class="text-left p-4 font-medium text-gray-600">Inscription</th>
+                    <th class="text-left p-4 font-medium text-gray-600">Statut</th>
+                    <th class="text-left p-4 font-medium text-gray-600">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- User Row 1 -->
+                <tr class="border-t hover:bg-gray-50 transition-colors">
+                    <td class="p-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                <i data-lucide="user" class="w-6 h-6 text-gray-500"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">Marie Dubois</p>
+                                <p class="text-sm text-gray-500">marie@example.com</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">Étudiant</span>
+                    </td>
+                    <td class="p-4">
+                        <span class="text-gray-600">14 Jan, 2024</span>
+                    </td>
+                    <td class="p-4">
+                        <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">Actif</span>
+                    </td>
+                    <td class="p-4">
+                        <div class="flex space-x-2">
+                            <button class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
+                                <i data-lucide="edit-2" class="w-5 h-5"></i>
+                            </button>
+                            <button class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                                <i data-lucide="trash-2" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Pagination -->
+                <div class="p-4 border-t">
+                    <div class="flex items-center justify-between">
+                        <p class="text-gray-500 text-sm">Affichage de 1-10 sur 45 utilisateurs</p>
+                        <div class="flex space-x-2">
+                            <button class="px-3 py-1 border rounded hover:bg-gray-50 transition-colors">Précédent</button>
+                            <button class="px-3 py-1 border rounded bg-blue-500 text-white hover:bg-blue-600 transition-colors">1</button>
+                            <button class="px-3 py-1 border rounded hover:bg-gray-50 transition-colors">2</button>
+                            <button class="px-3 py-1 border rounded hover:bg-gray-50 transition-colors">3</button>
+                            <button class="px-3 py-1 border rounded hover:bg-gray-50 transition-colors">Suivant</button>
+                        </div>
+                    </div>
+                </div>
+            </tbody>
+        </table>
     </div>
+</section>
+<!-- Tags Management Section -->
+<section id="tags" class="section">
+    <!-- En-tête de section -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-3xl font-bold text-gray-800">Gestion des Tags</h2>
+            <p class="text-gray-600 mt-1">Gérez les tags des cours</p>
+        </div>
+        <button class="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+            <i data-lucide="plus" class="w-5 h-5"></i>
+            <span>Ajouter un tag</span>
+        </button>
+    </div>
+
+    <!-- Tags Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Tag Card 1 -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="hash" class="w-6 h-6 text-blue-500"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-medium">JavaScript</h3>
+                        <p class="text-sm text-gray-500">45 cours associés</p>
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <button class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
+                        <i data-lucide="edit-2" class="w-5 h-5"></i>
+                    </button>
+                    <button class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="flex items-center text-sm text-gray-500">
+                <i data-lucide="trending-up" class="w-4 h-4 mr-1 text-green-500"></i>
+                <span>+12% ce mois</span>
+            </div>
+        </div>
+
+        <!-- Tag Card 2 -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="hash" class="w-6 h-6 text-green-500"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-medium">Python</h3>
+                        <p class="text-sm text-gray-500">38 cours associés</p>
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <button class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
+                        <i data-lucide="edit-2" class="w-5 h-5"></i>
+                    </button>
+                    <button class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="flex items-center text-sm text-gray-500">
+                <i data-lucide="trending-up" class="w-4 h-4 mr-1 text-green-500"></i>
+                <span>+8% ce mois</span>
+            </div>
+        </div>
+
+        <!-- Tag Card 3 -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="hash" class="w-6 h-6 text-purple-500"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-medium">Design UI/UX</h3>
+                        <p class="text-sm text-gray-500">24 cours associés</p>
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <button class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
+                        <i data-lucide="edit-2" class="w-5 h-5"></i>
+                    </button>
+                    <button class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="flex items-center text-sm text-gray-500">
+                <i data-lucide="trending-up" class="w-4 h-4 mr-1 text-green-500"></i>
+                <span>+15% ce mois</span>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Categories Management Section -->
+<section id="categories" class="section">
+    <!-- En-tête de section -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-3xl font-bold text-gray-800">Gestion des Catégories</h2>
+            <p class="text-gray-600 mt-1">Gérez les catégories de cours</p>
+        </div>
+        <button class="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+            <i data-lucide="plus" class="w-5 h-5"></i>
+            <span>Ajouter une catégorie</span>
+        </button>
+    </div>
+
+    <!-- Categories Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Category Card 1 -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="code" class="w-6 h-6 text-indigo-500"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-medium">Développement Web</h3>
+                        <p class="text-sm text-gray-500">56 cours</p>
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <button class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
+                        <i data-lucide="edit-2" class="w-5 h-5"></i>
+                    </button>
+                    <button class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="flex justify-between text-sm mb-2">
+                    <span class="text-gray-500">Progression</span>
+                    <span class="font-medium">85%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-indigo-500 h-2 rounded-full" style="width: 85%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Card 2 -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="pen-tool" class="w-6 h-6 text-pink-500"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-medium">Design UI/UX</h3>
+                        <p class="text-sm text-gray-500">34 cours</p>
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <button class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
+                        <i data-lucide="edit-2" class="w-5 h-5"></i>
+                    </button>
+                    <button class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="flex justify-between text-sm mb-2">
+                    <span class="text-gray-500">Progression</span>
+                    <span class="font-medium">65%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-pink-500 h-2 rounded-full" style="width: 65%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Card 3 -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="trending-up" class="w-6 h-6 text-orange-500"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-medium">Marketing Digital</h3>
+                        <p class="text-sm text-gray-500">28 cours</p>
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <button class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
+                        <i data-lucide="edit-2" class="w-5 h-5"></i>
+                    </button>
+                    <button class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="flex justify-between text-sm mb-2">
+                    <span class="text-gray-500">Progression</span>
+                    <span class="font-medium">45%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-orange-500 h-2 rounded-full" style="width: 45%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Fin du main -->
+</main>
+</div>
+
+<!-- Script pour les icônes et la navigation -->
+<script>
+    // Initialisation des icônes Lucide
+    lucide.createIcons();
+
+    // Fonction pour changer de section
+    function switchSection(sectionId) {
+        // Cacher toutes les sections
+        document.querySelectorAll('.section').forEach(section => {
+            section.classList.remove('active');
+        });
+        
+        // Afficher la section sélectionnée
+        document.getElementById(sectionId).classList.add('active');
+        
+        // Mettre à jour les classes actives des onglets
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Ajouter la classe active à l'onglet sélectionné
+        event.currentTarget.classList.add('active');
+    }
+</script>
+
 </body>
 </html>
