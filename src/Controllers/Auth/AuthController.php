@@ -1,7 +1,7 @@
 <?php
 namespace App\Controllers\Auth;
 
-use App\Classes\User;
+use App\Classes\Utilisateurs;
 use App\Config\Database;
 use App\Models\UserModel;
 use PDO;
@@ -9,34 +9,30 @@ use PDO;
 session_start(); // Start the session
 
 class AuthController {
-    public function login($email, $password) {
+    public function login($email, $mot_de_passe) {
         $userModel = new UserModel();
-        $user = $userModel->findUserByEmailAndPassword($email, $password);
+        $user = $userModel->findUserByEmailAndPassword($email, $mot_de_passe);
 
         if ($user == null) {
             echo "User not found or invalid password. Please check your credentials.";
             return; // Exit the function if user is not found
         }
 
-        if ($user->getStatut() !== 'isActive') {
+        if ($user->getStatut() !== 'actif') {
             echo "Your account is not yet activated. Please contact the administrator.";
             return; 
         }
         
-        $_SESSION['user_id'] = $user->getId();
-        $_SESSION['user_role'] = $user->getRole()->getTitle();
-
-
         $role = $user->getRole();
         if ($role) {
-            switch ($role->getTitle()) {
-                case "admin":
+            switch ($role->getTitre()) {
+                case "Admin":
                     header("Location: ../admin/dashboard.php");
                     break;
-                case "teacher":
+                case "Enseignant":
                     header("Location: ../Enseignant/home.php");
                     break;
-                case "student":
+                case "Etudiant":
                     header("Location: ../Etudiant/home.php");
                     break;
                 default:
@@ -54,8 +50,8 @@ class AuthController {
         header("Location: ../Auth/login.php");
         exit();
     }
-    public function register($firstname, $lastname, $email, $password, $role, $status) {
+    public function register($prenom, $nom, $email, $mot_de_passe, $role, $status) {
         $userModel = new UserModel();
-        $userModel->register($firstname, $lastname, $email, $password, $role, $status);
+        $userModel->register($prenom, $nom, $email, $mot_de_passe, $role, $status);
     }
 }

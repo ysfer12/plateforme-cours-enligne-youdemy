@@ -1,3 +1,55 @@
+<?php
+require_once '../../../vendor/autoload.php';
+use App\Controllers\TagsController;
+
+// Handle tag addition, update, and deletion
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $tagsController = new TagsController();
+    
+    // Add new tag
+    if (isset($_POST['add_tags'])) {
+        $tagName = trim($_POST['tag_name']);
+        
+        if (!empty($tagName)) {
+            try {
+                $addedTag = $tagsController->addTag($tagName);
+                $message = 'Tag ajouté avec succès.';
+            } catch (\Exception $e) {
+                $message = 'Erreur : ' . $e->getMessage();
+            }
+        }
+    }
+
+    // Update existing tag
+    if (isset($_POST['update_tag']) && isset($_POST['tag_id']) && isset($_POST['tag_name'])) {
+        try {
+            $tagId = $_POST['tag_id'];
+            $newTagName = trim($_POST['tag_name']);
+            
+            if (!empty($newTagName)) {
+                $tagsController->updateTag($tagId, $newTagName);
+                $message = 'Tag mis à jour avec succès.';
+            }
+        } catch (\Exception $e) {
+            $message = 'Erreur : ' . $e->getMessage();
+        }
+    }
+
+    // Delete tag
+    if (isset($_POST['delete_tag']) && isset($_POST['tag_id'])) {
+        try {
+            $tagsController->deleteTag($_POST['tag_id']);
+            $message = 'Tag supprimé avec succès.';
+        } catch (\Exception $e) {
+            $message = 'Erreur : ' . $e->getMessage();
+        }
+    }
+}
+
+// Fetch tags
+$tagsController = new TagsController();
+$tags = $tagsController->getTags();
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -286,6 +338,7 @@
         </table>
     </div>
 </section>
+
 <!-- Tags Management Section -->
 <section id="tags" class="section">
     <!-- En-tête de section -->
@@ -294,93 +347,155 @@
             <h2 class="text-3xl font-bold text-gray-800">Gestion des Tags</h2>
             <p class="text-gray-600 mt-1">Gérez les tags des cours</p>
         </div>
-        <button class="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+        <button onclick="openAddTagModal()" class="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
             <i data-lucide="plus" class="w-5 h-5"></i>
             <span>Ajouter un tag</span>
         </button>
     </div>
 
+    <!-- Affichage des messages -->
+    <?php if (isset($message)): ?>
+        <div class="mb-4 p-4 <?= strpos($message, 'Erreur') !== false ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700' ?> rounded">
+            <?= htmlspecialchars($message) ?>
+        </div>
+    <?php endif; ?>
+
     <!-- Tags Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Tag Card 1 -->
-        <div class="bg-white rounded-xl shadow-sm p-6">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <i data-lucide="hash" class="w-6 h-6 text-blue-500"></i>
+        <?php foreach ($tags as $index => $tag): ?>
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-<?= ['blue', 'green', 'purple', 'yellow', 'red'][$index % 5] ?>-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="hash" class="w-6 h-6 text-<?= ['blue', 'green', 'purple', 'yellow', 'red'][$index % 5] ?>-500"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-medium"><?= htmlspecialchars($tag->getNom()) ?></h3>
+                            <p class="text-sm text-gray-500"><?= rand(10, 50) ?> cours associés</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="font-medium">JavaScript</h3>
-                        <p class="text-sm text-gray-500">45 cours associés</p>
+                    <div class="flex space-x-2">
+                        <button onclick="openEditTagModal(<?= $tag->getId() ?>, '<?= htmlspecialchars($tag->getNom()) ?>')" class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
+                            <i data-lucide="edit-2" class="w-5 h-5"></i>
+                        </button>
+                        <button onclick="openDeleteTagModal(<?= $tag->getId() ?>, '<?= htmlspecialchars($tag->getNom()) ?>')" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                        </button>
                     </div>
                 </div>
-                <div class="flex space-x-2">
-                    <button class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
-                        <i data-lucide="edit-2" class="w-5 h-5"></i>
-                    </button>
-                    <button class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                        <i data-lucide="trash-2" class="w-5 h-5"></i>
-                    </button>
+                <div class="flex items-center text-sm text-gray-500">
+                    <i data-lucide="trending-up" class="w-4 h-4 mr-1 text-green-500"></i>
+                    <span>+<?= rand(5, 15) ?>% ce mois</span>
                 </div>
             </div>
-            <div class="flex items-center text-sm text-gray-500">
-                <i data-lucide="trending-up" class="w-4 h-4 mr-1 text-green-500"></i>
-                <span>+12% ce mois</span>
-            </div>
-        </div>
+        <?php endforeach; ?>
+    </div>
 
-        <!-- Tag Card 2 -->
-        <div class="bg-white rounded-xl shadow-sm p-6">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                        <i data-lucide="hash" class="w-6 h-6 text-green-500"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-medium">Python</h3>
-                        <p class="text-sm text-gray-500">38 cours associés</p>
-                    </div>
-                </div>
-                <div class="flex space-x-2">
-                    <button class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
-                        <i data-lucide="edit-2" class="w-5 h-5"></i>
-                    </button>
-                    <button class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                        <i data-lucide="trash-2" class="w-5 h-5"></i>
-                    </button>
-                </div>
+    <!-- Modal for Adding Tags -->
+    <div id="addTagModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold">Ajouter un tag</h2>
+                <button onclick="closeAddTagModal()" class="text-gray-500 hover:text-gray-700">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
             </div>
-            <div class="flex items-center text-sm text-gray-500">
-                <i data-lucide="trending-up" class="w-4 h-4 mr-1 text-green-500"></i>
-                <span>+8% ce mois</span>
-            </div>
+            <form method="POST">
+                <input 
+                    type="text" 
+                    name="tag_name" 
+                    placeholder="Nom du tag" 
+                    class="w-full border rounded p-2 mb-4"
+                    required
+                >
+                <div class="flex justify-end space-x-2">
+                    <button 
+                        type="button" 
+                        onclick="closeAddTagModal()" 
+                        class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                    >
+                        Annuler
+                    </button>
+                    <button 
+                        type="submit" 
+                        name="add_tags"
+                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                        Ajouter
+                    </button>
+                </div>
+            </form>
         </div>
+    </div>
 
-        <!-- Tag Card 3 -->
-        <div class="bg-white rounded-xl shadow-sm p-6">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <i data-lucide="hash" class="w-6 h-6 text-purple-500"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-medium">Design UI/UX</h3>
-                        <p class="text-sm text-gray-500">24 cours associés</p>
-                    </div>
-                </div>
-                <div class="flex space-x-2">
-                    <button class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
-                        <i data-lucide="edit-2" class="w-5 h-5"></i>
-                    </button>
-                    <button class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                        <i data-lucide="trash-2" class="w-5 h-5"></i>
-                    </button>
-                </div>
+    <!-- Modal for Editing Tags -->
+    <div id="editTagModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold">Modifier un tag</h2>
+                <button onclick="closeEditTagModal()" class="text-gray-500 hover:text-gray-700">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
             </div>
-            <div class="flex items-center text-sm text-gray-500">
-                <i data-lucide="trending-up" class="w-4 h-4 mr-1 text-green-500"></i>
-                <span>+15% ce mois</span>
+            <form method="POST">
+                <input type="hidden" id="editTagId" name="tag_id">
+                <input 
+                    type="text" 
+                    id="editTagName"
+                    name="tag_name" 
+                    placeholder="Nom du tag" 
+                    class="w-full border rounded p-2 mb-4"
+                    required
+                >
+                <div class="flex justify-end space-x-2">
+                    <button 
+                        type="button" 
+                        onclick="closeEditTagModal()" 
+                        class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                    >
+                        Annuler
+                    </button>
+                    <button 
+                        type="submit" 
+                        name="update_tag"
+                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                        Mettre à jour
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Deleting Tags -->
+    <div id="deleteTagModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold">Supprimer un tag</h2>
+                <button onclick="closeDeleteTagModal()" class="text-gray-500 hover:text-gray-700">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
             </div>
+            <form method="POST">
+                <input type="hidden" id="deleteTagId" name="tag_id">
+                <p class="mb-4 text-gray-600">Êtes-vous sûr de vouloir supprimer le tag <span id="deleteTagName" class="font-bold"></span> ?</p>
+                <div class="flex justify-end space-x-2">
+                    <button 
+                        type="button" 
+                        onclick="closeDeleteTagModal()" 
+                        class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                    >
+                        Annuler
+                    </button>
+                    <button 
+                        type="submit" 
+                        name="delete_tag"
+                        class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                    >
+                        Supprimer
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </section>
@@ -504,9 +619,42 @@
 
 <!-- Script pour les icônes et la navigation -->
 <script>
-    // Initialisation des icônes Lucide
-    lucide.createIcons();
+function openAddTagModal() {
+    document.getElementById('addTagModal').classList.remove('hidden');
+    document.getElementById('addTagModal').classList.add('flex');
+}
 
+function closeAddTagModal() {
+    document.getElementById('addTagModal').classList.remove('flex');
+    document.getElementById('addTagModal').classList.add('hidden');
+}
+
+function openEditTagModal(tagId, tagName) {
+    document.getElementById('editTagId').value = tagId;
+    document.getElementById('editTagName').value = tagName;
+    document.getElementById('editTagModal').classList.remove('hidden');
+    document.getElementById('editTagModal').classList.add('flex');
+}
+
+function closeEditTagModal() {
+    document.getElementById('editTagModal').classList.remove('flex');
+    document.getElementById('editTagModal').classList.add('hidden');
+}
+
+function openDeleteTagModal(tagId, tagName) {
+    document.getElementById('deleteTagId').value = tagId;
+    document.getElementById('deleteTagName').textContent = tagName;
+    document.getElementById('deleteTagModal').classList.remove('hidden');
+    document.getElementById('deleteTagModal').classList.add('flex');
+}
+
+function closeDeleteTagModal() {
+    document.getElementById('deleteTagModal').classList.remove('flex');
+    document.getElementById('deleteTagModal').classList.add('hidden');
+}
+
+// Initialize Lucide icons
+    lucide.createIcons();
     // Fonction pour changer de section
     function switchSection(sectionId) {
         // Cacher toutes les sections

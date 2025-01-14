@@ -2,7 +2,7 @@
 namespace App\Models;
 
 use App\Classes\Role;
-use App\Classes\User;
+use App\Classes\Utilisateurs;
 use App\Config\Database;
 use PDO;
 
@@ -14,18 +14,18 @@ class UserModel {
         $this->conn = $db->connection();
     }
 
-    public function findUserByEmailAndPassword($email, $password) {
+    public function findUserByEmailAndPassword($email, $mot_de_passe) {
         // Updated query to include the `statut` column
-        $query = "SELECT user.id, user.firstName, user.lastName, user.email, 
-                         user.password, user.statut, 
-                         role.role_id as role_id, role.title as `role`
-                  FROM user
-                  JOIN role ON role.role_id = user.role_id
-                  WHERE user.email = :email AND user.password = :password";
+        $query = "SELECT Utilisateurs.id, Utilisateurs.prenom, Utilisateurs.nom, Utilisateurs.email, 
+                         Utilisateurs.mot_de_passe, Utilisateurs.statut, 
+                         Role.role_id as role_id, Role.titre as `role`
+                  FROM Utilisateurs
+                  JOIN role ON Role.role_id = Utilisateurs.role_id
+                  WHERE Utilisateurs.email = :email AND Utilisateurs.mot_de_passe = :mot_de_passe";
         
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":email", $email);
-        $stmt->bindParam(":password", $password);
+        $stmt->bindParam(":mot_de_passe", $mot_de_passe);
         $stmt->execute();
         
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -35,12 +35,12 @@ class UserModel {
         } else {
             $role = new Role($row["role_id"], $row["role"]);
             
-            return new User(
+            return new Utilisateurs(
                 $row['id'],
-                $row["firstName"],
-                $row["lastName"],
+                $row["prenom"],
+                $row["nom"],
                 $row["email"],
-                $row["password"],
+                $row["mot_de_passe"],
                 $role,
                 $row["statut"] 
             );
@@ -52,11 +52,11 @@ class UserModel {
         header("Location: ../login.php");
     }
 
-    public function register($firstname, $lastname, $email, $password, $roleTitle) {
+    public function register($prenom, $nom, $email, $mot_de_passe, $roleTitre) {
         // Fetch the role ID based on the role title
-        $roleQuery = "SELECT role_id FROM role WHERE title = :roleTitle";
+        $roleQuery = "SELECT role_id FROM Role WHERE titre = :roleTitre";
         $roleStmt = $this->conn->prepare($roleQuery);
-        $roleStmt->bindParam(":roleTitle", $roleTitle);
+        $roleStmt->bindParam(":roleTitle", $roleTitre);
         $roleStmt->execute();
         $roleRow = $roleStmt->fetch(PDO::FETCH_ASSOC);
         
@@ -66,16 +66,16 @@ class UserModel {
         $roleId = $roleRow['role_id'];
         
         // Determine the status based on the role title
-        $statut = ($roleTitle === 'student') ? 'isActive' : 'isNotActive';//ternary operator
+        $statut = ($roleTitle === 'etudiant') ? 'Actif' : 'Inactif';//ternary operator
         
         // Insert the new user into the database
-        $query = "INSERT INTO user (firstName, lastName, email, password, role_id, statut) 
-                  VALUES (:firstname, :lastname, :email, :password, :roleId, :statut)";
+        $query = "INSERT INTO Utilisateurs (prenom, nom, email, mot_de_passe, role_id, statut) 
+                  VALUES (:prenom, :nom, :email, :mot_de_passe, :roleId, :statut)";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":firstname", $firstname);
-        $stmt->bindParam(":lastname", $lastname);
+        $stmt->bindParam(":prenom", $prenom);
+        $stmt->bindParam(":nom", $nom);
         $stmt->bindParam(":email", $email);
-        $stmt->bindParam(":password", $password);
+        $stmt->bindParam(":mot_de_passe", $mot_de_passe);
         $stmt->bindParam(":roleId", $roleId);
         $stmt->bindParam(":statut", $statut);
         

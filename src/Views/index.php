@@ -87,7 +87,7 @@
                 <!-- Navigation Links -->
                 <div class="flex items-center space-x-8">
                     <div class="hidden md:flex items-center space-x-6">
-                        <a href="#" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
+                        <a href="../Views/Cours/Cours.php" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
                             <i class="fas fa-book-open text-sm"></i>
                             <span>Catalogue</span>
                         </a>
@@ -200,7 +200,7 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center mb-12">
                 <h2 class="text-3xl font-bold text-gray-800">Cours les plus populaires</h2>
-                <a href="#" class="text-blue-600 hover:text-blue-700 flex items-center">
+                <a href="../../Views/Cours/Cours.php" class="text-blue-600 hover:text-blue-700 flex items-center">
                     Voir tout <i class="fas fa-arrow-right ml-2"></i>
                 </a>
             </div>
@@ -208,14 +208,14 @@
                 <!-- Course Card 1 -->
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
                     <div class="relative">
-                        <img src="/api/placeholder/400/200" alt="Course" class="w-full h-48 object-cover">
+                        <img src="../../public/assets/depositphotos_68471565-stock-illustration-online-communication-education-and-social.jpg" alt="Course" class="w-full h-48 object-cover">
                         <div class="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
                             Bestseller
                         </div>
                     </div>
                     <div class="p-6">
                         <div class="flex items-center space-x-2 mb-4">
-                            <img src="/api/placeholder/32/32" alt="Instructor" class="w-8 h-8 rounded-full">
+                            <img src="../../public/assets/depositphotos_68471565-stock-illustration-online-communication-education-and-social.jpg" alt="Instructor" class="w-8 h-8 rounded-full">
                             <span class="text-sm text-gray-600">John Doe</span>
                         </div>
                         <h3 class="font-semibold text-xl mb-2">Développement Web Full Stack</h3>
@@ -242,7 +242,7 @@
                 <!-- Course Card 2 -->
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
                     <div class="relative">
-                        <img src="/api/placeholder/400/200" alt="Course" class="w-full h-48 object-cover">
+                        <img src="../../public/assets/depositphotos_68471565-stock-illustration-online-communication-education-and-social.jpg" alt="Course" class="w-full h-48 object-cover">
                         <div class="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 rounded-full text-sm">
                             Nouveau
                         </div>
@@ -276,7 +276,7 @@
                 <!-- Course Card 3 -->
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
                     <div class="relative">
-                        <img src="/api/placeholder/400/200" alt="Course" class="w-full h-48 object-cover">
+                        <img src="../../public/assets/depositphotos_68471565-stock-illustration-online-communication-education-and-social.jpg" alt="Course" class="w-full h-48 object-cover">
                         <div class="absolute top-4 right-4 bg-purple-600 text-white px-3 py-1 rounded-full text-sm">
                             Populaire
                         </div>
@@ -388,7 +388,7 @@
                 <!-- Success Story Card 1 -->
                 <div class="testimonial-card bg-white rounded-xl shadow-lg p-6">
                     <div class="flex items-center space-x-4 mb-6">
-                        <img src="/api/placeholder/64/64" alt="Student" class="w-16 h-16 rounded-full">
+                        <img src="../../public/assets/depositphotos_208209736-stock-photo-portrait-smiling-young-female-student.jpg" alt="Student" class="w-16 h-16 rounded-full">
                         <div>
                             <h4 class="font-semibold">Marie Laurent</h4>
                             <p class="text-gray-600 text-sm">Développeuse Frontend</p>
@@ -409,7 +409,7 @@
                 <!-- Success Story Card 2 -->
                 <div class="testimonial-card bg-white rounded-xl shadow-lg p-6">
                     <div class="flex items-center space-x-4 mb-6">
-                        <img src="/api/placeholder/64/64" alt="Student" class="w-16 h-16 rounded-full">
+                        <img src="../../public/assets/depositphotos_109883396-stock-photo-student-in-school-library-using.jpg" alt="Student" class="w-16 h-16 rounded-full">
                         <div>
                             <h4 class="font-semibold">Thomas Dubois</h4>
                             <p class="text-gray-600 text-sm">Data Scientist</p>
@@ -671,3 +671,190 @@
             </div>
         </div>
     </section>
+    <!-- Enhanced Footer with Newsletter -->
+    <footer class="bg-gray-800 text-gray-300">
+        <!-- Newsletter Section -->
+        <div class="border-b border-gray-700">
+            <div class="max-w-7xl mx-auto px-4 py-12">
+                <div class="max-w-3xl mx-auto text-center">
+                    <h3 class="text-2xl font-bold text-white mb-3">Restez informé de nos nouveautés</h3>
+                    <p class="text-gray-400 mb-6">
+                        Recevez nos meilleures offres et conseils pédagogiques directement dans votre boîte mail
+                    </p>
+                    <form class="flex flex-col sm:flex-row gap-4">
+                        <input type="email" 
+                               placeholder="Votre adresse email" 
+                               class="flex-1 px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                            S'abonner
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Footer Content -->
+        <div class="max-w-7xl mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
+                <!-- Company Info -->
+                <div class="col-span-2">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-graduation-cap text-2xl text-white"></i>
+                        </div>
+                        <span class="text-2xl font-bold text-white">Youdemy</span>
+                    </div>
+                    <p class="text-gray-400 mb-6">
+                        Youdemy est la plateforme leader de l'apprentissage en ligne, 
+                        offrant des cours de qualité pour développer vos compétences professionnelles.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition">
+                            <i class="fab fa-facebook-f text-white"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition">
+                            <i class="fab fa-twitter text-white"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition">
+                            <i class="fab fa-linkedin-in text-white"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition">
+                            <i class="fab fa-instagram text-white"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="text-white font-semibold text-lg mb-4">Liens rapides</h4>
+                    <ul class="space-y-3">
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                À propos
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Carrières
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Blog
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Devenir formateur
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Affiliations
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Popular Categories -->
+                <div>
+                    <h4 class="text-white font-semibold text-lg mb-4">Catégories</h4>
+                    <ul class="space-y-3">
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Développement Web
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Business & Marketing
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Design & Créativité
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                IA & Data Science
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Développement Personnel
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div>
+                    <h4 class="text-white font-semibold text-lg mb-4">Support</h4>
+                    <ul class="space-y-3">
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Centre d'aide
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Documentation
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Contact
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                FAQ
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Communauté
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom Footer -->
+            <div class="border-t border-gray-700 mt-12 pt-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Copyright -->
+                    <div class="text-gray-400 text-sm">
+                        © 2024 Youdemy. Tous droits réservés.
+                    </div>
+                    
+                    <!-- Legal Links -->
+                    <div class="flex flex-wrap gap-4 text-sm justify-start md:justify-end">
+                        <a href="#" class="text-gray-400 hover:text-white transition">Confidentialité</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">CGU</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">Mentions légales</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">Cookies</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">Accessibilité</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
