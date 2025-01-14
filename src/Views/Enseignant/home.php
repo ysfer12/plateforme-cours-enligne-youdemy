@@ -3,10 +3,10 @@ require_once("../../../vendor/autoload.php");
 use App\Controllers\Auth\AuthController;
 session_start();
 
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../Auth/login.php");
-    exit();
-}
+// if (!isset($_SESSION['user_id'])) {
+//     header("Location: ../Auth/login.php");
+//     exit();
+// }
 
 if($_SERVER["REQUEST_METHOD"] == "POST")
 {

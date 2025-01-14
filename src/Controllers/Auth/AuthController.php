@@ -18,7 +18,7 @@ class AuthController {
             return; // Exit the function if user is not found
         }
 
-        if ($user->getStatut() !== 'actif') {
+        if ($user->getStatut() !== 'Actif') {
             echo "Your account is not yet activated. Please contact the administrator.";
             return; 
         }
