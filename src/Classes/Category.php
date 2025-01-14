@@ -2,43 +2,25 @@
 namespace App\Classes;
 
 class Category {
-    private $id;
+    private $category_id;
     private $nom;
-    private $statut;
-    private $dateAjout;
-    private $dateSuppression;
-    private $coursCount;
+    private $description;
 
-    public function __construct($id, $nom, $statut, $dateAjout = '', $dateSuppression = '', $coursCount = 0) {
-        $this->id = $id;
+    public function __construct($category_id, $nom, $description) {
+        $this->category_id = $category_id;
         $this->nom = $nom;
-        $this->statut = $statut;
-        $this->dateAjout = $dateAjout;
-        $this->dateSuppression = $dateSuppression;
-        $this->coursCount = $coursCount;
+        $this->description = $description;
     }
 
-    public function getId() {
-        return $this->id;
+    public function getCategoryId() {
+        return $this->category_id;
     }
 
     public function getNom() {
         return $this->nom;
     }
 
-    public function getStatut() {
-        return $this->statut;
-    }
-
-    public function getDateAjout() {
-        return $this->dateAjout;
-    }
-
-    public function getDateSuppression() {
-        return $this->dateSuppression;
-    }
-
-    public function getCoursCount() {
-        return $this->coursCount;
+    public function getDescription() {
+        return $this->description;
     }
 }
