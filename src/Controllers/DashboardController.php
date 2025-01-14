@@ -29,7 +29,7 @@ class DashboardController {
     }
 
     public function getPublishedCoursesCount() {
-        $query = "SELECT COUNT(*) as count FROM Cours WHERE statut = 'Publié'";
+        $query = "SELECT COUNT(*) as count FROM Cours WHERE status = 'Publié'";
         $stmt = $this->conn->query($query);
         return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
     }
@@ -47,8 +47,8 @@ class DashboardController {
         return [
             'students' => $this->calculateGrowthPercentage('Etudiant'),
             'teachers' => $this->calculateGrowthPercentage('Enseignant'),
-            'courses' => $this->calculateCourseGrowthPercentage(),
-            'revenue' => $this->calculateRevenueGrowthPercentage()
+            // 'courses' => $this->calculateCourseGrowthPercentage(),
+            // 'revenue' => $this->calculateRevenueGrowthPercentage()
         ];
     }
 
@@ -73,21 +73,21 @@ class DashboardController {
         return round((($result['current_month'] - $result['last_month']) / $result['last_month']) * 100, 1);
     }
 
-    private function calculateCourseGrowthPercentage() {
-        $query = "SELECT 
-            (SELECT COUNT(*) FROM Cours 
-             WHERE MONTH(date_creation) = MONTH(CURRENT_DATE())
-             AND YEAR(date_creation) = YEAR(CURRENT_DATE())) as current_month,
-            (SELECT COUNT(*) FROM Cours 
-             WHERE MONTH(date_creation) = MONTH(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH))
-             AND YEAR(date_creation) = YEAR(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH))) as last_month";
+    // private function calculateCourseGrowthPercentage() {
+    //     $query = "SELECT 
+    //         (SELECT COUNT(*) FROM Cours 
+    //          WHERE MONTH(date_creation) = MONTH(CURRENT_DATE())
+    //          AND YEAR(date_creation) = YEAR(CURRENT_DATE())) as current_month,
+    //         (SELECT COUNT(*) FROM Cours 
+    //          WHERE MONTH(date_creation) = MONTH(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH))
+    //          AND YEAR(date_creation) = YEAR(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH))) as last_month";
         
-        $stmt = $this->conn->query($query);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    //     $stmt = $this->conn->query($query);
+    //     $result = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        if ($result['last_month'] == 0) return 0;
-        return round((($result['current_month'] - $result['last_month']) / $result['last_month']) * 100, 1);
-    }
+    //     if ($result['last_month'] == 0) return 0;
+    //     return round((($result['current_month'] - $result['last_month']) / $result['last_month']) * 100, 1);
+    // }
 
     private function calculateRevenueGrowthPercentage() {
         $query = "SELECT 
@@ -117,11 +117,11 @@ class DashboardController {
                  SELECT 'cours' as type,
                         c.titre as prenom,
                         e.prenom as nom,
-                        c.date_creation as date,
+                        c.dateAjout as date,
                         'cours' as role
                  FROM Cours c
-                 JOIN Utilisateurs e ON e.id = c.enseignant_id
-                 WHERE c.date_creation >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY)
+                 JOIN Utilisateurs e ON e.id = c.enseignat_id
+                 WHERE c.dateAjout >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY)
                  ORDER BY date DESC
                  LIMIT :limit";
         
