@@ -119,7 +119,7 @@ try {
             <!-- Header -->
             <header class="flex justify-between items-center mb-8">
                 <h1 class="text-3xl font-bold text-gray-800">Mes Cours</h1>
-                <a href="ajouter-cours.php" class="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition duration-300 ease-in-out">
+                <a href="ajouter-cours.php" class="bg-primary-500 text-red px-4 py-2 rounded-lg hover:bg-primary-600 transition duration-300 ease-in-out">
                     Ajouter un Cours
                 </a>
             </header>
@@ -133,7 +133,7 @@ try {
             <!-- Cours List -->
             <div class="space-y-4">
                 <?php if (empty($mesCours)): ?>
-                    <div class="bg-white p-4 rounded-lg shadow-md text-center text-gray-500">
+                    <div class="bg-white p-4 rounded-lg shadow-md text-center text-red-500">
                         Vous n'avez pas encore ajouté de cours.
                     </div>
                 <?php else: ?>
@@ -157,7 +157,7 @@ try {
                                     Voir
                                 </a>
                                 <a href="modifier-cours.php?id=<?= htmlspecialchars($cours['cours_id']) ?>" 
-                                   class="bg-primary-500 text-white px-3 py-1 rounded-md hover:bg-primary-600 transition duration-300 ease-in-out">
+                                   class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-primary-600 transition duration-300 ease-in-out">
                                     Éditer
                                 </a>
                             </div>
