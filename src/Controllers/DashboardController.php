@@ -131,4 +131,26 @@ class DashboardController {
         
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getGrowthClass($percentage) {
+        return $percentage >= 0 ? 'text-green-500 bg-green-100' : 'text-red-500 bg-red-100';
+    }
+    public function formatTimeAgo($datetime) {
+        $timestamp = strtotime($datetime);
+        $now = time();
+        $diff = $now - $timestamp;
+
+        if ($diff < 60) {
+            return "Il y a quelques secondes";
+        } elseif ($diff < 3600) {
+            $minutes = floor($diff / 60);
+            return "Il y a " . $minutes . " minute" . ($minutes > 1 ? 's' : '');
+        } elseif ($diff < 86400) {
+            $hours = floor($diff / 3600);
+            return "Il y a " . $hours . " heure" . ($hours > 1 ? 's' : '');
+        } else {
+            $days = floor($diff / 86400);
+            return "Il y a " . $days . " jour" . ($days > 1 ? 's' : '');
+        }
+    }
 }

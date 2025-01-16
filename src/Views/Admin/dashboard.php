@@ -2,10 +2,13 @@
 require_once '../../../vendor/autoload.php';
 use App\Controllers\DashboardController;
 
-// Check admin session
+// Improved session check
 // session_start();
-// if (!isset($_SESSION['admin_id'])) {
-//     header('Location: login.php');
+
+// // Check both user_role and admin_id
+// if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
+//     // Redirect to login
+//     header('Location: ../Auth/login.php');
 //     exit();
 // }
 

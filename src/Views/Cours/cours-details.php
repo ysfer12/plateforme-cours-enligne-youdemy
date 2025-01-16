@@ -208,7 +208,7 @@ try {
                         <?php else: ?>
                             <div class="text-center">
                                 <p class="text-gray-600 mb-4">Connectez-vous pour vous inscrire à ce cours</p>
-                                <a href="login.php" 
+                                <a href="../Auth/login.php" 
                                    class="block w-full bg-blue-600 text-white py-4 rounded-xl hover:bg-blue-700 transition duration-300">
                                     Se connecter
                                 </a>

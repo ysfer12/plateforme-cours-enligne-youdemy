@@ -1,79 +1,30 @@
 <?php
+// Database and Controller initialization
+require_once '../../../vendor/autoload.php';
+
+use App\Config\Database;
+use App\Controllers\Catalogue\CoursController;
+use App\Models\Catalogue\CoursModel;
+
+// Initialize database connection
+$database = new Database();
+$pdo = $database->connection();
+
+// Initialize model and controller
 try {
-    $pdo = new PDO("mysql:host=localhost;dbname=Youdemy", "root", "");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $coursModel = new CoursModel($pdo);
+    $coursController = new CoursController($coursModel);
 
-    // Récupérer les termes de recherche
-    $search = isset($_GET['search']) ? trim($_GET['search']) : '';
-    $category = isset($_GET['category']) ? (int)$_GET['category'] : 0;
+    // Get view data from controller
+    $viewData = $coursController->index();
 
-    $coursParPage = 6;
-    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-    $offset = ($page - 1) * $coursParPage;
-
-    // Construction de la clause WHERE pour la recherche
-    $params = [];
-
-    if (!empty($search)) {
-        $params[':search'] = "%$search%";
-    }
-
-    if ($category > 0) {
-        $params[':category'] = $category;
-    }
-
-    // Requête pour compter le total des cours
-    $countQuery = "
-        SELECT COUNT(DISTINCT c.cours_id) as total 
-        FROM Cours c
-        LEFT JOIN Cours_Tags ct ON c.cours_id = ct.cours_id
-        LEFT JOIN Tag t ON ct.tag_id = t.tag_id
-      ";
-
-    $countStmt = $pdo->prepare($countQuery);
-    foreach ($params as $key => $value) {
-        $countStmt->bindValue($key, $value);
-    }
-    $countStmt->execute();
-    $totalCours = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
-    $totalPages = ceil($totalCours / $coursParPage);
-
-    // Récupérer les catégories pour le filtre
-    $categoryQuery = "SELECT category_id, nom FROM Category ORDER BY nom";
-    $categories = $pdo->query($categoryQuery)->fetchAll(PDO::FETCH_ASSOC);
-
-    // Requête principale avec recherche
-    $query = "
-        SELECT DISTINCT c.*, cat.nom as category_name, 
-               GROUP_CONCAT(DISTINCT t.tag_id) as tag_ids,
-               GROUP_CONCAT(DISTINCT t.nom) as tag_names,
-               u.prenom, u.nom as nom_enseignant
-        FROM Cours c
-        LEFT JOIN Category cat ON c.category_id = cat.category_id
-        LEFT JOIN Cours_Tags ct ON c.cours_id = ct.cours_id
-        LEFT JOIN Tag t ON ct.tag_id = t.tag_id
-        LEFT JOIN Utilisateurs u ON c.enseignat_id = u.id
-        
-        GROUP BY c.cours_id
-        ORDER BY c.dateAjout DESC
-        LIMIT :offset, :limit
-    ";
-
-    $stmt = $pdo->prepare($query);
-    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-    $stmt->bindValue(':limit', $coursParPage, PDO::PARAM_INT);
-    foreach ($params as $key => $value) {
-        $stmt->bindValue($key, $value);
-    }
-    $stmt->execute();
-
-    $cours = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-} catch(PDOException $e) {
-    die("Erreur de connexion : " . $e->getMessage());
+    // Extract variables for the view
+    extract($viewData);
+} catch (Exception $e) {
+    // Handle any potential errors
+    die("Error: " . $e->getMessage());
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -87,10 +38,10 @@ try {
     <div class="container mx-auto px-4 py-8">
         <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Découvrez nos Cours</h1>
 
-        <!-- Barre de recherche et filtres -->
+        <!-- Search bar and filters -->
         <div class="mb-8 bg-white p-6 rounded-xl shadow-md">
             <form action="" method="GET" class="space-y-4 md:space-y-0 md:flex md:items-end md:space-x-4">
-                <!-- Barre de recherche -->
+                <!-- Search bar -->
                 <div class="flex-1">
                     <label for="search" class="block text-sm font-medium text-gray-700 mb-2">
                         Rechercher un cours
@@ -108,7 +59,7 @@ try {
                     </div>
                 </div>
 
-                <!-- Filtre par catégorie -->
+                <!-- Category filter -->
                 <div class="md:w-1/4">
                     <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
                         Catégorie
@@ -126,7 +77,7 @@ try {
                     </select>
                 </div>
 
-                <!-- Bouton de recherche -->
+                <!-- Search button -->
                 <div>
                     <button type="submit" 
                             class="w-full md:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
@@ -136,7 +87,7 @@ try {
             </form>
         </div>
 
-        <!-- Message si aucun résultat -->
+        <!-- No results message -->
         <?php if (empty($cours)): ?>
             <div class="text-center py-12">
                 <i class="fas fa-search text-gray-400 text-5xl mb-4"></i>
@@ -148,7 +99,7 @@ try {
             </div>
         <?php else: ?>
 
-        <!-- Grille des cours -->
+        <!-- Course grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <?php foreach ($cours as $course): 
                 $tags = [];
@@ -157,7 +108,7 @@ try {
                 }
             ?>
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden transform transition duration-300 hover:scale-105">
-                    <!-- Image de couverture par défaut avec dégradé -->
+                    <!-- Default cover image with gradient -->
                     <div class="relative h-48 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
                         <i class="fas fa-graduation-cap text-white text-4xl"></i>
                         <div class="absolute bottom-4 left-4 bg-white px-3 py-1 rounded-full text-sm font-medium text-blue-600">
@@ -183,7 +134,7 @@ try {
                         <div class="flex flex-wrap gap-2 mb-4">
                             <?php foreach ($tags as $tag): ?>
                                 <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-medium">
-                                    #<?= htmlspecialchars($tag) ?>
+                                    #<?= htmlspecialchars(trim($tag)) ?>
                                 </span>
                             <?php endforeach; ?>
                         </div>
@@ -195,7 +146,7 @@ try {
                                 <span>Voir le cours</span>
                                 <i class="fas fa-arrow-right ml-2"></i>
                             </a>
-                            <?php if (!empty($course['lienVideo'])): ?>
+                            <?php if (!empty($course['lienContenu'])): ?>
                                 <div class="text-gray-400">
                                     <i class="fas fa-video"></i>
                                 </div>

@@ -33,9 +33,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <!-- Logo -->
                 <div class="flex items-center justify-center mb-8">
                     <div class="bg-blue-50 p-2 rounded-lg">
-                        <i class="fas fa-briefcase text-blue-600 text-xl"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                        <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                    </svg>
                     </div>
-                    <span class="text-2xl font-bold text-gray-900 ml-2">CareerLink</span>
+                    <span class="text-2xl font-bold text-gray-900 ml-2">Youdemy</span>
                 </div>
 
                 <h2 class="text-2xl font-bold text-center text-gray-900 mb-6">Créer un compte</h2>

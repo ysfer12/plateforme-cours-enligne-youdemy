@@ -49,7 +49,7 @@ class UserModel {
 
     public function logout() {
         session_destroy();
-        header("Location: ../login.php");
+        header("Location: ../Auth/login.php");
     }
 
     public function register($prenom, $nom, $email, $mot_de_passe, $roleTitre) {

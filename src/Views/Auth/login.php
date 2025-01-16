@@ -1,20 +1,25 @@
 <?php
-
+session_start(); // Ensure session is started at the beginning
 require_once("../../../vendor/autoload.php");
 use App\Controllers\Auth\AuthController;
 
+
+// Check if form is submitted
 if (isset($_POST["submit"])) {
-    if (empty($_POST["email"]) && empty($_POST["mot_de_pass"])) {
-        echo "L'adresse e-mail ou le mot de passe est vide.";
+    // Validate input
+    if (empty($_POST["email"]) || empty($_POST["mot_de_pass"])) {
+        // Store error in session for display
+        $_SESSION['login_error'] = "L'adresse e-mail ou le mot de passe est vide.";
+        header("Location: ../Auth/login.php");
+        exit();
     } else {
-        $email = $_POST["email"];
+        $email = trim($_POST["email"]);
         $mot_de_pass = $_POST["mot_de_pass"];
 
         $authController = new AuthController();
         $authController->login($email, $mot_de_pass);
     }
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="fr">

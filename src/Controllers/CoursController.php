@@ -78,21 +78,23 @@ class CoursController
             return false;
         }
     }
-    public function deleteCourse($cours_id, $typeContenu)
-    {
+    
+    public function deleteCourse($cours_id) {
         try {
-            if ($typeContenu === 'video') {
-                $course = new VideoCours($this->db);
-            } elseif ($typeContenu === 'document') {
-                $course = new DocumentCours($this->db);
-            } else {
-                throw new \Exception("Type de contenu invalide");
-            }
-
-            return $course->deleteCourse($cours_id);
+            // Supprimer les tags
+            $this->db->prepare("DELETE FROM Cours_Tags WHERE cours_id = ?")->execute([$cours_id]);
+            
+            // Supprimer les inscriptions
+            $this->db->prepare("DELETE FROM Inscriptions WHERE cours_id = ?")->execute([$cours_id]);
+            
+            // Supprimer le cours
+            $query = "DELETE FROM Cours WHERE cours_id = :cours_id";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':cours_id', $cours_id);
+            
+            return $stmt->execute();
         } catch (\Exception $e) {
-            $this->error_messages[] = $e->getMessage();
-            return false;
+            throw new \Exception("Erreur lors de la suppression du cours : " . $e->getMessage());
         }
     }
 
