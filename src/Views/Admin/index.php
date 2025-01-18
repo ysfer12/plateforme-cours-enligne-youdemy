@@ -1,3 +1,9 @@
+<?php   
+require_once '../../../vendor/autoload.php';
+use App\Config\Database;
+AuthMiddleware::checkUserRole('admin');
+?>
+
 <!DOCTYPE html>
 <html lang="fr" class="scroll-smooth">
 <head>
@@ -87,7 +93,7 @@
                 <!-- Navigation Links -->
                 <div class="flex items-center space-x-8">
                     <div class="hidden md:flex items-center space-x-6">
-                        <a href="../Views/Cours/Cours.php" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
+                        <a href="../Cours/Cours.php" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
                             <i class="fas fa-book-open text-sm"></i>
                             <span>Catalogue</span>
                         </a>
@@ -168,7 +174,7 @@
                 </div>
                 <!-- Enhanced Hero Image -->
                 <div class="hidden md:block relative z-10">
-                    <img src="../../public/assets/depositphotos_109883396-stock-photo-student-in-school-library-using.jpg" alt="Learning Illustration" class="rounded-2xl shadow-2xl transform hover:scale-105 transition duration-500">
+                    <img src="../../../public/assets/depositphotos_109883396-stock-photo-student-in-school-library-using.jpg" alt="Learning Illustration" class="rounded-2xl shadow-2xl transform hover:scale-105 transition duration-500">
                     <!-- Floating Elements -->
                     <div class="absolute -top-4 -right-4 bg-white rounded-lg shadow-lg p-4 animate-float">
                         <div class="flex items-center space-x-2">
