@@ -4,8 +4,7 @@ session_start();
 require_once '../../../vendor/autoload.php';
 
 use App\Config\Database;
-use App\Controllers\CoursController;
-
+use App\Controllers\Enseignant\CoursController;
 // Vérification de la session
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../Auth/login.php');

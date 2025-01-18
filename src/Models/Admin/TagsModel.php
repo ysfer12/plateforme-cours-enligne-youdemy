@@ -1,6 +1,5 @@
 <?php 
-namespace App\Models;
-
+namespace App\Models\Admin;
 use App\Classes\Tags;
 use App\Config\Database;
 use PDO;

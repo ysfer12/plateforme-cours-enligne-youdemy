@@ -1,3 +1,10 @@
+<?php
+require_once '../../../vendor/autoload.php';
+use App\Config\AuthMiddleware;
+
+// Check if the user is logged in and has the role 'Etudiant'
+AuthMiddleware::checkUserRole('Etudiant');
+?>
 <!DOCTYPE html>
 <html lang="fr" class="scroll-smooth">
 <head>
@@ -87,7 +94,7 @@
                 <!-- Navigation Links -->
                 <div class="flex items-center space-x-8">
                     <div class="hidden md:flex items-center space-x-6">
-                        <a href="../Views/Cours/Cours.php" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
+                        <a href="../Cours/Cours.php" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
                             <i class="fas fa-book-open text-sm"></i>
                             <span>Catalogue</span>
                         </a>

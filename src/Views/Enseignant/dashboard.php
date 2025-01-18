@@ -1,77 +1,22 @@
 <?php
-session_start();
+require_once '../../../vendor/autoload.php';
 
-// Database connection
-$host = 'localhost';
-$dbname = 'Youdemy';
-$username = 'root';
-$password = '';
+use App\Controllers\Enseignant\DashboardController;
 
-try {
-    $connexion = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
-    $connexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    die("Erreur de connexion : " . $e->getMessage());
-}
+$controller = new DashboardController();
+$viewData = $controller->index();
 
-// Vérifier la connexion de l'utilisateur (enseignant)
-if (!isset($_SESSION['user_id'])) {
-    header('Location: ../Auth/login.php');
-    exit();
-}
+// Initialize default values
+$utilisateur = $viewData['utilisateur'] ?? null;
+$statCours = $viewData['statCours'] ?? ['total_cours' => 0];
+$statEtudiants = $viewData['statEtudiants'] ?? ['total_etudiants' => 0];
+$statPopulaires = $viewData['statPopulaires'] ?? ['populaires' => 0];
+$coursRecents = $viewData['coursRecents'] ?? [];
+$erreur = $viewData['erreur'] ?? null;
 
-// Récupérer les informations de l'utilisateur
-try {
-    $requete = $connexion->prepare("
-        SELECT u.*, r.titre as role_titre 
-        FROM Utilisateurs u 
-        JOIN Role r ON u.role_id = r.role_id
-        WHERE u.id = :id
-    ");
-    $requete->execute([':id' => $_SESSION['user_id']]);
-    $utilisateur = $requete->fetch(PDO::FETCH_ASSOC);
-} catch(PDOException $e) {
-    $erreur = "Erreur de récupération des informations : " . $e->getMessage();
-}
 
-// Récupérer les statistiques des cours
-try {
-    // Nombre total de cours
-    $requeteCours = $connexion->prepare("
-        SELECT COUNT(*) as total_cours 
-        FROM Cours 
-        WHERE enseignat_id = :id
-    ");
-    $requeteCours->execute([':id' => $_SESSION['user_id']]);
-    $statCours = $requeteCours->fetch(PDO::FETCH_ASSOC);
-
-    // Nombre total d'étudiants inscrits
-    $requeteEtudiants = $connexion->prepare("
-        SELECT COUNT(DISTINCT i.etudiant_id) as total_etudiants
-        FROM Inscriptions i
-        JOIN Cours c ON i.cours_id = c.cours_id
-        WHERE c.enseignat_id = :id
-    ");
-    $requeteEtudiants->execute([':id' => $_SESSION['user_id']]);
-    $statEtudiants = $requeteEtudiants->fetch(PDO::FETCH_ASSOC);
-
-    // Récupérer les cours récents
-    $requeteCourRecents = $connexion->prepare("
-        SELECT c.*, COUNT(i.id) as total_inscriptions
-        FROM Cours c
-        LEFT JOIN Inscriptions i ON c.cours_id = i.cours_id
-        WHERE c.enseignat_id = :id
-        GROUP BY c.cours_id
-        ORDER BY c.dateAjout DESC
-        LIMIT 3
-    ");
-    $requeteCourRecents->execute([':id' => $_SESSION['user_id']]);
-    $coursRecents = $requeteCourRecents->fetchAll(PDO::FETCH_ASSOC);
-} catch(PDOException $e) {
-    $erreur = "Erreur de récupération des données : " . $e->getMessage();
-}
+// View content starts here
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -83,8 +28,8 @@ try {
 </head>
 <body class="bg-gray-50 text-gray-800">
     <div class="flex min-h-screen">
-        <!-- Sidebar -->
-        <aside class="w-64 bg-blue-600 text-white p-6 space-y-6">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-blue-600 text-white p-6 space-y-6">
             <!-- Profile Section -->
             <div class="flex items-center space-x-4">
                 <img src="/api/placeholder/48/48" alt="Profile" class="w-12 h-12 rounded-full">
@@ -135,12 +80,11 @@ try {
             </nav>
         </aside>
 
-        <!-- Main Content -->
         <main class="flex-1 p-6 overflow-y-auto">
             <!-- Header -->
             <header class="flex justify-between items-center mb-8">
                 <h1 class="text-3xl font-bold text-gray-800">Tableau de Bord</h1>
-                <a href="ajouter-cours.php" class="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition duration-300 ease-in-out">
+                <a href="ajouter-cours.php" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out">
                     Ajouter un Cours
                 </a>
             </header>
@@ -151,63 +95,38 @@ try {
                 </div>
             <?php endif; ?>
 
-            <!-- Stats Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <!-- Total Courses Card -->
-                <div class="bg-white p-6 rounded-lg shadow-md text-center">
-                    <div class="text-4xl text-primary-500 mb-4">
-                        <i class="fas fa-book-open"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold mb-2">Cours Total</h3>
-                    <p class="text-3xl font-bold text-primary-600">
-                        <?= htmlspecialchars($statCours['total_cours'] ?? 0) ?>
-                    </p>
-                </div>
+<!-- Stats Grid Section -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <div class="text-4xl text-blue-500 mb-4">
+            <i class="fas fa-book-open"></i>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">Cours Total</h3>
+        <p class="text-3xl font-bold text-blue-600">
+            <?= htmlspecialchars($statCours['total_cours']) ?>
+        </p>
+    </div>
 
-                <!-- Enrolled Students Card -->
-                <div class="bg-white p-6 rounded-lg shadow-md text-center">
-                    <div class="text-4xl text-green-500 mb-4">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold mb-2">Étudiants Inscrits</h3>
-                    <p class="text-3xl font-bold text-green-600">
-                        <?= htmlspecialchars($statEtudiants['total_etudiants'] ?? 0) ?>
-                    </p>
-                </div>
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <div class="text-4xl text-green-500 mb-4">
+            <i class="fas fa-users"></i>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">Étudiants Inscrits</h3>
+        <p class="text-3xl font-bold text-green-600">
+            <?= htmlspecialchars($statEtudiants['total_etudiants']) ?>
+        </p>
+    </div>
 
-                <!-- Popular Courses Card -->
-                <div class="bg-white p-6 rounded-lg shadow-md text-center">
-                    <div class="text-4xl text-purple-500 mb-4">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold mb-2">Cours Populaires</h3>
-                    <p class="text-3xl font-bold text-purple-600">
-                        <?php 
-                        $requetePopulaires = $connexion->prepare("
-                            SELECT c.cours_id, COUNT(i.id) as populaires
-                            FROM Cours c
-                            LEFT JOIN Inscriptions i ON c.cours_id = i.cours_id
-                            WHERE c.enseignat_id = :id
-                            GROUP BY c.cours_id
-                            ORDER BY populaires DESC
-                            LIMIT 1
-                        ");
-                        $requetePopulaires->execute([':id' => $_SESSION['user_id']]);
-                        $statPopulaires = $requetePopulaires->fetch(PDO::FETCH_ASSOC);
-
-                        if ($statPopulaires) {
-                            $populaireCours = $statPopulaires['cours_id'];
-                            $populaireInscrits = $statPopulaires['populaires'];
-                        } else {
-                            $populaireCours = 0;
-                            $populaireInscrits = 0;
-                        }
-                        echo htmlspecialchars($populaireInscrits);
-                        ?>
-                    </p>
-                </div>
-            </div>
-
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <div class="text-4xl text-purple-500 mb-4">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">Cours Populaires</h3>
+        <p class="text-3xl font-bold text-purple-600">
+            <?= htmlspecialchars($statPopulaires['populaires']) ?>
+        </p>
+    </div>
+</div>
             <!-- Recent Courses -->
             <section>
                 <h2 class="text-2xl font-bold mb-6">Cours Récents</h2>
@@ -218,7 +137,6 @@ try {
                         </div>
                     <?php else: ?>
                         <?php foreach ($coursRecents as $cours): ?>
-                            <!-- Course Item -->
                             <div class="bg-white p-4 rounded-lg shadow-md flex justify-between items-center">
                                 <div>
                                     <h3 class="text-lg font-semibold text-gray-800">
@@ -237,7 +155,7 @@ try {
                                         Voir
                                     </a>
                                     <a href="modifier-cours.php?id=<?= htmlspecialchars($cours['cours_id']) ?>" 
-                                       class="bg-primary-500 text-white px-3 py-1 rounded-md hover:bg-primary-600 transition duration -300 ease-in-out">
+                                       class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition duration-300 ease-in-out">
                                         Éditer
                                     </a>
                                 </div>

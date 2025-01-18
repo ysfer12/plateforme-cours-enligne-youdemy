@@ -5,12 +5,8 @@ require_once '../../../vendor/autoload.php';
 use App\Config\Database;
 use App\Controllers\EtudiantController;
 use App\Controllers\Auth\AuthController;
-
-// Vérification de la session
-if (!isset($_SESSION['user_id'])) {
-    header('Location: ../Auth/login.php');
-    exit();
-}
+use App\Config\AuthMiddleware;
+AuthMiddleware::checkUserRole('Etudiant');
 
 if(isset($_POST['submit'])) {
 $logout = new AuthController();
@@ -29,9 +25,9 @@ try {
     $statistics = $dashboardData['statistics'];
     $error = $dashboardData['error'];
 
-    $totalCourses = $statistics['totalCourses'] ?? 0;
-    $totalCategories = $statistics['totalCategories'] ?? 0; 
-    $lastInscription = $statistics['lastInscription'] ?? 'Aucune';
+    $totalCourses = $statistics['totalCourses'] ?? 0;//opérateur de fusion null 
+    $totalCategories = $statistics['totalCategories'] ?? 0;//opérateur de fusion null  
+    $lastInscription = $statistics['lastInscription'] ?? 'Aucune';//opérateur de fusion null 
 
 } catch(Exception $e) {
     $error = "Une erreur est survenue : " . $e->getMessage();

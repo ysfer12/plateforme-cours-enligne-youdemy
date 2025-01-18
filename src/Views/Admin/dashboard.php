@@ -1,6 +1,13 @@
 <?php
 require_once '../../../vendor/autoload.php';
-use App\Controllers\DashboardController;
+use App\Controllers\Admin\DashboardController;
+use App\Controllers\Admin\UserModel;
+
+if(isset($_POST['submit'])) {
+    $logout = new UserController();
+    $logout->logout();
+    exit();
+}
 
 // Improved session check
 // session_start();
@@ -111,14 +118,16 @@ function formatTimeAgo($datetime) {
             </nav>
 
             <div class="absolute bottom-0 w-full p-4 border-t border-gray-700">
-                <a href="logout.php" class="flex items-center text-gray-300 hover:text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                        <polyline points="16 17 21 12 16 7"/>
-                        <line x1="21" y1="12" x2="9" y2="12"/>
-                    </svg>
-                    Déconnexion
-                </a>
+                <form action="" method="POST" class="flex items-center text-gray-300 hover:text-white">
+                    <button type="submit" name="submit" class="flex items-center w-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                        Déconnexion
+                    </button>
+                </form>
             </div>
         </aside>
 

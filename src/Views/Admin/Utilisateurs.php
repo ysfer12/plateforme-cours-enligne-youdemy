@@ -1,7 +1,7 @@
 <?php
 require_once '../../../vendor/autoload.php';
 use App\Controllers\Auth\AuthController;
-use App\Models\UserModel;
+use App\Models\Admin\UserModel;
 
 // session_start();
 // if (!isset($_SESSION['admin_id'])) {

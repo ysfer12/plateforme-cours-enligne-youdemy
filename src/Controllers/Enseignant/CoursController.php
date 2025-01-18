@@ -1,10 +1,8 @@
 <?php
-namespace App\Controllers;
+namespace App\Controllers\Enseignant;
+use App\Models\Enseignant\VideoCours;
+use App\Models\Enseignant\DocumentCours;
 
-use App\Models\VideoCours;
-use App\Models\DocumentCours;
-use App\Models\Tags;
-use App\Models\Cours_Tags;
 
 class CoursController
 {

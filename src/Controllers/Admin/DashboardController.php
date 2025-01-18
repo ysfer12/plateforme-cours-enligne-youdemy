@@ -1,6 +1,5 @@
 <?php
-namespace App\Controllers;
-
+namespace App\Controllers\Admin;
 use App\Config\Database;
 use PDO;
 
@@ -32,15 +31,6 @@ class DashboardController {
         $query = "SELECT COUNT(*) as count FROM Cours WHERE status = 'Publié'";
         $stmt = $this->conn->query($query);
         return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
-    }
-
-    public function getMonthlyRevenue() {
-        $query = "SELECT COALESCE(SUM(montant), 0) as total 
-                 FROM Paiements 
-                 WHERE MONTH(date_paiement) = MONTH(CURRENT_DATE()) 
-                 AND YEAR(date_paiement) = YEAR(CURRENT_DATE())";
-        $stmt = $this->conn->query($query);
-        return $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     }
 
     public function getGrowthPercentages() {

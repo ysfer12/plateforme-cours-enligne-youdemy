@@ -39,13 +39,13 @@ class AuthController {
                 case "Admin":
                     // Specifically set admin session variable
                     $_SESSION['admin_id'] = $user->getId();
-                    header("Location: ../Admin/dashboard.php");
+                    header("Location: ../Admin/index.php");
                     break;
                 case "Enseignant":
-                    header("Location: ../Enseignant/home.php");
+                    header("Location: ../Enseignant/index.php");
                     break;
                 case "Etudiant":
-                    header("Location: ../Etudiant/home.php");
+                    header("Location: ../Etudiant/index.php");
                     break;
                 default:
                     $_SESSION['login_error'] = "Invalid role.";
@@ -61,10 +61,8 @@ class AuthController {
     }
     
     public function logout() {
-        // Destroy the session
         session_unset();
         session_destroy();
-        // Redirect to login page
         header("Location: ../Auth/login.php");
         exit();
     }

@@ -3,7 +3,7 @@ session_start();
 
 require_once '../../../vendor/autoload.php';
 
-use App\Controllers\CoursController;
+use App\Controllers\Enseignant\CoursController; 
 use App\Config\Database;
 
 // Vérifier la connexion de l'utilisateur (enseignant)

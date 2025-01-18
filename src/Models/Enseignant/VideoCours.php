@@ -1,6 +1,5 @@
 <?php
-namespace App\Models;
-
+namespace App\Models\Enseignant;
 use App\Classes\Cours;
 
 class VideoCours extends Cours

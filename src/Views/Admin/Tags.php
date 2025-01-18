@@ -1,6 +1,6 @@
 <?php
 require_once '../../../vendor/autoload.php';
-use App\Controllers\TagsController;
+use App\Controllers\Admin\TagsController;
 
 
 // Check admin session
