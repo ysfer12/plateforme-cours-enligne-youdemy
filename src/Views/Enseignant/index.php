@@ -1,3 +1,8 @@
+<?php
+require_once '../../../vendor/autoload.php';
+use App\Config\AuthMiddleware;
+AuthMiddleware::checkUserRole('Enseignant');
+?>
 <!DOCTYPE html>
 <html lang="fr" class="scroll-smooth">
 <head>
@@ -112,7 +117,7 @@
                         </div>
                     </div>
                     <div class="flex items-center space-x-3">
-                        <a href="../Enseignat/home.php" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
+                        <a href="../Enseignant/dashboard.php" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
                             Mon tableau de bord
                         </a>
                     </div>
