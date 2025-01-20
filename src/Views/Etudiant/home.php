@@ -1,6 +1,4 @@
 <?php
-session_start();
-
 require_once '../../../vendor/autoload.php';
 use App\Config\Database;
 use App\Controllers\EtudiantController;
@@ -57,9 +55,6 @@ try {
                         <a href="dashboard.php" class="border-b-2 border-blue-600 text-gray-900 inline-flex items-center px-1 pt-1 text-sm font-medium">
                             Dashboard
                         </a>
-                        <a href="cours.php" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                            Catalogue
-                        </a>
                     </div>
                 </div>
 
@@ -81,11 +76,11 @@ try {
                         <!-- Menu déroulant -->
                         <div id="user-menu" class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
                             <div class="py-1">
-                                <a href="dashboard.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    <i class="fas fa-columns mr-2"></i>Dashboard
+                                <a href="../Etudiant/index.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-columns mr-2"></i>Accueil
                                 </a>
-                                <a href="profil.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    <i class="fas fa-user mr-2"></i>Mon profil
+                                <a href="../Etudiant/Catalogue/Cours.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-user mr-2"></i>Catalogue
                                 </a>
                                 <a href="parametres.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     <i class="fas fa-cog mr-2"></i>Paramètres

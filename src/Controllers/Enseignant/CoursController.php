@@ -1,17 +1,24 @@
 <?php
 namespace App\Controllers\Enseignant;
+
 use App\Models\Enseignant\VideoCours;
 use App\Models\Enseignant\DocumentCours;
-
+use App\Config\Database;
+use App\Models\Enseignant\CourseModel;
+use PDO;
+use PDOException;
 
 class CoursController
 {
     private $db;
+    private $courseModel;
     private $error_messages = [];
 
-    public function __construct($db)
+    public function __construct()
     {
-        $this->db = $db;
+        $database = new Database();
+        $this->db = $database->connection();
+        $this->courseModel = new CourseModel();
     }
 
     public function createCourse($titre, $description, $lienContenu, $enseignant_id, $category_id, $typeContenu)
@@ -58,9 +65,9 @@ class CoursController
                         typeContenu = :typeContenu,
                         lienContenu = :lienContenu,
                         category_id = :category_id
-                    WHERE cours_id = :cours_id 
-                    AND enseignat_id = :enseignant_id";
-    
+                      WHERE cours_id = :cours_id 
+                      AND enseignat_id = :enseignant_id";
+
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(':titre', $titre);
             $stmt->bindParam(':description', $description);
@@ -69,30 +76,26 @@ class CoursController
             $stmt->bindParam(':category_id', $category_id);
             $stmt->bindParam(':cours_id', $cours_id);
             $stmt->bindParam(':enseignant_id', $enseignant_id);
-    
+
             return $stmt->execute();
         } catch (\Exception $e) {
             $this->error_messages[] = $e->getMessage();
             return false;
         }
     }
-    
-    public function deleteCourse($cours_id) {
+
+    public function deleteCourse($cours_id)
+    {
         try {
-            // Supprimer les tags
             $this->db->prepare("DELETE FROM Cours_Tags WHERE cours_id = ?")->execute([$cours_id]);
-            
-            // Supprimer les inscriptions
             $this->db->prepare("DELETE FROM Inscriptions WHERE cours_id = ?")->execute([$cours_id]);
-            
-            // Supprimer le cours
             $query = "DELETE FROM Cours WHERE cours_id = :cours_id";
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(':cours_id', $cours_id);
-            
             return $stmt->execute();
         } catch (\Exception $e) {
-            throw new \Exception("Erreur lors de la suppression du cours : " . $e->getMessage());
+            $this->error_messages[] = "Erreur lors de la suppression du cours : " . $e->getMessage();
+            return false;
         }
     }
 
@@ -115,23 +118,20 @@ class CoursController
     public function getCourseById($cours_id, $typeContenu = null)
     {
         try {
-            // First get the course to determine its type if not provided
             $query = "SELECT * FROM Cours WHERE cours_id = :cours_id";
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(':cours_id', $cours_id);
             $stmt->execute();
-            
+
             $course = $stmt->fetch(\PDO::FETCH_ASSOC);
-            
+
             if (!$course) {
                 $this->error_messages[] = "Cours non trouvé";
                 return null;
             }
-    
-            // If type not provided, use the one from database
+
             $typeContenu = $typeContenu ?? $course['typeContenu'];
-    
-            // Create appropriate course object
+
             if ($typeContenu === 'video') {
                 $courseObj = new VideoCours($this->db);
             } elseif ($typeContenu === 'document') {
@@ -139,13 +139,14 @@ class CoursController
             } else {
                 throw new \Exception("Type de contenu invalide");
             }
-    
+
             return $course;
         } catch (\Exception $e) {
             $this->error_messages[] = $e->getMessage();
             return null;
         }
     }
+
     public function addTagToCourse($cours_id, $tag_id)
     {
         try {
@@ -178,8 +179,8 @@ class CoursController
     {
         try {
             $query = "SELECT t.* FROM Tag t 
-                    JOIN Cours_Tags ct ON t.tag_id = ct.tag_id 
-                    WHERE ct.cours_id = :cours_id";
+                      JOIN Cours_Tags ct ON t.tag_id = ct.tag_id 
+                      WHERE ct.cours_id = :cours_id";
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(':cours_id', $cours_id);
             $stmt->execute();
@@ -190,28 +191,32 @@ class CoursController
         }
     }
 
-    public function getErrorMessages()
+    public function getCategories()
     {
-        return $this->error_messages;
+        return $this->courseModel->getCategories();
     }
 
-    public function clearErrorMessages()
+    public function getTags()
     {
-        $this->error_messages = [];
+        return $this->courseModel->getTags();
     }
 
-    // Méthodes utilitaires
-    public function validateCourseExists($cours_id)
+    public function getUserInfo($user_id)
     {
-        $query = "SELECT COUNT(*) FROM Cours WHERE cours_id = :cours_id";
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':cours_id', $cours_id);
-        $stmt->execute();
-        return $stmt->fetchColumn() > 0;
+        try {
+            $query = "SELECT u.*, r.titre as role_titre 
+                      FROM Utilisateurs u 
+                      JOIN Role r ON u.role_id = r.role_id
+                      WHERE u.id = :id";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([':id' => $user_id]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            $this->error_messages[] = "Erreur lors de la récupération des informations de l'utilisateur : " . $e->getMessage();
+            return null;
+        }
     }
 
-
-    
     public function getCoursesByTeacher($enseignant_id)
     {
         try {
@@ -245,9 +250,9 @@ class CoursController
         try {
             $searchTerm = "%$searchTerm%";
             $query = "SELECT * FROM Cours 
-                     WHERE titre LIKE :searchTerm 
-                     OR description LIKE :searchTerm 
-                     ORDER BY dateAjout DESC";
+                      WHERE titre LIKE :searchTerm 
+                      OR description LIKE :searchTerm 
+                      ORDER BY dateAjout DESC";
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(':searchTerm', $searchTerm);
             $stmt->execute();
@@ -257,43 +262,83 @@ class CoursController
             return [];
         }
     }
+
     public function getTeacherCoursesCount($enseignant_id)
-{
-    $query = "SELECT COUNT(*) FROM Cours WHERE enseignat_id = :enseignant_id";
-    $stmt = $this->db->prepare($query);
-    $stmt->bindParam(':enseignant_id', $enseignant_id);
-    $stmt->execute();
-    return $stmt->fetchColumn();
-}
+    {
+        try {
+            $query = "SELECT COUNT(*) FROM Cours WHERE enseignat_id = :enseignant_id";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':enseignant_id', $enseignant_id);
+            $stmt->execute();
+            return $stmt->fetchColumn();
+        } catch (\Exception $e) {
+            $this->error_messages[] = $e->getMessage();
+            return 0;
+        }
+    }
 
-public function getMostPopularCourse($enseignant_id)
-{
-    $query = "SELECT c.cours_id, c.titre, COUNT(i.id) as inscriptions 
-              FROM Cours c 
-              LEFT JOIN Inscriptions i ON c.cours_id = i.cours_id 
-              WHERE c.enseignat_id = :enseignant_id 
-              GROUP BY c.cours_id 
-              ORDER BY inscriptions DESC 
-              LIMIT 1";
-    $stmt = $this->db->prepare($query);
-    $stmt->bindParam(':enseignant_id', $enseignant_id);
-    $stmt->execute();
-    return $stmt->fetch(\PDO::FETCH_ASSOC);
-}
+    public function getMostPopularCourse($enseignant_id)
+    {
+        try {
+            $query = "SELECT c.cours_id, c.titre, COUNT(i.id) as inscriptions 
+                      FROM Cours c 
+                      LEFT JOIN Inscriptions i ON c.cours_id = i.cours_id 
+                      WHERE c.enseignat_id = :enseignant_id 
+                      GROUP BY c.cours_id 
+                      ORDER BY inscriptions DESC 
+                      LIMIT 1";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':enseignant_id', $enseignant_id);
+            $stmt->execute();
+            return $stmt->fetch(\PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {
+            $this->error_messages[] = $e->getMessage();
+            return null;
+        }
+    }
 
-public function getRecentCourses($enseignant_id, $limit)
-{
-    $query = "SELECT c.*, COUNT(i.id) as total_inscriptions 
-              FROM Cours c 
-              LEFT JOIN Inscriptions i ON c.cours_id = i.cours_id 
-              WHERE c.enseignat_id = :enseignant_id 
-              GROUP BY c.cours_id 
-              ORDER BY c.dateAjout DESC 
-              LIMIT :limit";
-    $stmt = $this->db->prepare($query);
-    $stmt->bindParam(':enseignant_id', $enseignant_id);
-    $stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
-    $stmt->execute();
-    return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-}
+    public function getRecentCourses($enseignant_id, $limit)
+    {
+        try {
+            $query = "SELECT c.*, COUNT(i.id) as total_inscriptions 
+                      FROM Cours c 
+                      LEFT JOIN Inscriptions i ON c.cours_id = i.cours_id 
+                      WHERE c.enseignat_id = :enseignant_id 
+                      GROUP BY c.cours_id 
+                      ORDER BY c.dateAjout DESC 
+                      LIMIT :limit";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':enseignant_id', $enseignant_id);
+            $stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {
+            $this->error_messages[] = $e->getMessage();
+            return [];
+        }
+    }
+
+    public function getErrorMessages()
+    {
+        return $this->error_messages;
+    }
+
+    public function clearErrorMessages()
+    {
+        $this->error_messages = [];
+    }
+
+    public function validateCourseExists($cours_id)
+    {
+        try {
+            $query = "SELECT COUNT(*) FROM Cours WHERE cours_id = :cours_id";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':cours_id', $cours_id);
+            $stmt->execute();
+            return $stmt->fetchColumn() > 0;
+        } catch (\Exception $e) {
+            $this->error_messages[] = $e->getMessage();
+            return false;
+        }
+    }
 }

@@ -28,16 +28,16 @@ $erreur = $viewData['erreur'] ?? null;
 </head>
 <body class="bg-gray-50 text-gray-800">
     <div class="flex min-h-screen">
-  <!-- Sidebar -->
-  <aside class="w-64 bg-blue-600 text-white p-6 space-y-6">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-blue-600 text-white p-6 space-y-6">
             <!-- Profile Section -->
             <div class="flex items-center space-x-4">
-                <img src="/api/placeholder/48/48" alt="Profile" class="w-12 h-12 rounded-full">
+                <img src="../../../public/assets/depositphotos_747828354-stock-illustration-blue-circular-user-profile-icon.jpg" alt="Profile" class="w-12 h-12 rounded-full">
                 <div>
                     <h2 class="text-lg font-semibold">
                         <?= htmlspecialchars($utilisateur['prenom'] . ' ' . $utilisateur['nom']) ?>
                     </h2>
-                    <p class="text-sm text-primary-200">
+                    <p class="text-sm text-gray-200">
                         <?= htmlspecialchars($utilisateur['role_titre']) ?>
                     </p>
                 </div>
@@ -47,31 +47,25 @@ $erreur = $viewData['erreur'] ?? null;
             <nav>
                 <ul class="space-y-2">
                     <li>
-                        <a href="dashboard.php" class="flex items-center space-x-3 py-2 px-4 hover:bg-primary-500 rounded-lg transition duration-300 ease-in-out active:bg-primary-500">
+                        <a href="dashboard.php" class="flex items-center space-x-3 py-2 px-4 bg-blue-700 rounded-lg">
                             <i class="fas fa-home w-5"></i>
                             <span>Tableau de Bord</span>
                         </a>
                     </li>
                     <li>
-                        <a href="mes-cours.php" class="flex items-center space-x-3 py-2 px-4 hover:bg-primary-500 rounded-lg transition duration-300 ease-in-out">
+                        <a href="mes-cours.php" class="flex items-center space-x-3 py-2 px-4 hover:bg-blue-700 rounded-lg transition duration-300">
                             <i class="fas fa-book w-5"></i>
                             <span>Mes Cours</span>
                         </a>
                     </li>
                     <li>
-                        <a href="ajouter-cours.php" class="flex items-center space-x-3 py-2 px-4 hover:bg-primary-500 rounded-lg transition duration-300 ease-in-out">
+                        <a href="ajouter-cours.php" class="flex items-center space-x-3 py-2 px-4 hover:bg-blue-700 rounded-lg transition duration-300">
                             <i class="fas fa-plus-circle w-5"></i>
                             <span>Ajouter un Cours</span>
                         </a>
                     </li>
                     <li>
-                        <a href="parametres.php" class="flex items -center space-x-3 py-2 px-4 hover:bg-primary-500 rounded-lg transition duration-300 ease-in-out">
-                            <i class="fas fa-cog w-5"></i>
-                            <span>Paramètres</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="deconnexion.php" class="flex items-center space-x-3 py-2 px-4 hover:bg-red-500 rounded-lg transition duration-300 ease-in-out text-red-100">
+                        <a href="../Auth/logout.php" class="flex items-center space-x-3 py-2 px-4 hover:bg-red-500 rounded-lg transition duration-300 text-red-100">
                             <i class="fas fa-sign-out-alt w-5"></i>
                             <span>Déconnexion</span>
                         </a>

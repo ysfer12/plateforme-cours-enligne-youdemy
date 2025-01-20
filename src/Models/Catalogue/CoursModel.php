@@ -29,11 +29,12 @@ class CoursModel {
         }
 
         $query = "
-            SELECT DISTINCT c.*, cat.nom as category_name, 
-                   GROUP_CONCAT(DISTINCT t.tag_id) as tag_ids,
-                   GROUP_CONCAT(DISTINCT t.nom) as tag_names,
-                   u.prenom, u.nom as nom_enseignant
-            FROM Cours c
+        SELECT DISTINCT c.*, cat.nom as category_name,
+                GROUP_CONCAT(DISTINCT t.tag_id) as tag_ids,
+                GROUP_CONCAT(DISTINCT t.nom) as tag_names,
+                u.prenom, u.nom as nom_enseignant,
+                c.typeContenu, c.lienContenu
+        FROM Cours c
             LEFT JOIN Category cat ON c.category_id = cat.category_id
             LEFT JOIN Cours_Tags ct ON c.cours_id = ct.cours_id
             LEFT JOIN Tag t ON ct.tag_id = t.tag_id

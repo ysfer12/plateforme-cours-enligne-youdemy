@@ -71,4 +71,25 @@ class CourseModel {
             return [];
         }
     }
+
+    public function getCategories() {
+        try {
+            $query = "SELECT category_id, nom FROM Category ORDER BY nom";
+            $stmt = $this->conn->query($query);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            return [];
+        }
+    }
+
+    public function getTags() {
+        try {
+            $query = "SELECT tag_id, nom FROM Tag ORDER BY nom";
+            $stmt = $this->conn->query($query);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            return [];
+        }
+    }
+
 }

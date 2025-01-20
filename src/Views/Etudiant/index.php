@@ -64,8 +64,8 @@ AuthMiddleware::checkUserRole('Etudiant');
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Navigation Bar - Enhanced Glass Effect -->
-    <nav class="fixed w-full z-50 glass-effect border-b border-gray-200">
+  <!-- Navigation Bar - Enhanced with Mobile Support -->
+  <nav class="fixed w-full z-50 glass-effect border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-16">
                 <!-- Logo with Gradient -->
@@ -73,10 +73,17 @@ AuthMiddleware::checkUserRole('Etudiant');
                     <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
                         <i class="fas fa-graduation-cap text-2xl text-white"></i>
                     </div>
-                    <span class="text-2xl font-bold gradient-text">Youdemy</span>
+                    <span class="text-xl md:text-2xl font-bold gradient-text">Youdemy</span>
                 </div>
 
-                <!-- Enhanced Search Bar -->
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-gray-600 hover:text-blue-600 focus:outline-none">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+
+                <!-- Enhanced Search Bar - Hidden on Mobile -->
                 <div class="hidden md:flex flex-1 max-w-xl mx-8">
                     <div class="relative w-full">
                         <input type="text" 
@@ -91,42 +98,62 @@ AuthMiddleware::checkUserRole('Etudiant');
                     </div>
                 </div>
 
-                <!-- Navigation Links -->
-                <div class="flex items-center space-x-8">
+                <!-- Navigation Links - Hidden on Mobile -->
+                <div class="hidden md:flex items-center space-x-8">
                     <div class="hidden md:flex items-center space-x-6">
-                        <a href="../Cours/Cours.php" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
+                        <a href="../Etudiant/Catalogue/Cours.php" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
                             <i class="fas fa-book-open text-sm"></i>
                             <span>Catalogue</span>
                         </a>
                         <div class="relative group">
                             <a href="#" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
                                 <i class="fas fa-th-large text-sm"></i>
-                                <span>Catégories</span>
+                                <span>Qui sommes nous?</span>
                                 <i class="fas fa-chevron-down text-xs ml-1"></i>
                             </a>
-                            <!-- Dropdown Menu -->
-                            <div class="absolute top-full -left-4 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 hidden group-hover:block border border-gray-100">
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
-                                    Développement Web
-                                </a>
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
-                                    Business
-                                </a>
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600">
-                                    Design
-                                </a>
-                            </div>
                         </div>
                     </div>
                     <div class="flex items-center space-x-3">
-                        <a href="../Etudiant/home.php" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
-                            Mon tableau de bord
+                    <a href="../Etudiant/home.php" class="px-4 py-2 text-center bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
+                            Mes Cours
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Menu - Hidden by Default -->
+            <div id="mobile-menu" class="hidden md:hidden bg-white pb-4 absolute top-16 left-0 right-0 border-b border-gray-200 shadow-lg">
+                <!-- Mobile Search -->
+                <div class="px-4 pt-2 pb-3">
+                    <div class="relative">
+                        <input type="text" 
+                               placeholder="Rechercher..." 
+                               class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pl-12">
+                        <div class="absolute left-4 top-2.5 text-gray-400">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Navigation Links -->
+                <div class="px-4 pt-2 pb-3 space-y-1">
+                    <a href="../Views/Cours/Cours.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                        <i class="fas fa-book-open mr-2"></i>
+                        Catalogue
+                    </a>
+                    <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                        <i class="fas fa-th-large mr-2"></i>
+                        Qui sommes nous?
+                    </a>
+                    <div class="pt-4 flex flex-col space-y-2">
+                        <a href="../Etudiant/home.php" class="px-4 py-2 text-center bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
+                            Mes Cours
                         </a>
                     </div>
                 </div>
             </div>
         </div>
-    </nav>
+    </nav>    
     <!-- Enhanced Hero Section with Animated Elements -->
     <section class="pt-24 pb-12 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 relative overflow-hidden">
         <!-- Animated Background Elements -->
@@ -860,5 +887,40 @@ AuthMiddleware::checkUserRole('Etudiant');
             </div>
         </div>
     </footer>
+    <script>
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuButton.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent event from bubbling up
+            mobileMenu.classList.toggle('hidden');
+            
+            // Update the icon
+            const icon = mobileMenuButton.querySelector('i');
+            if (mobileMenu.classList.contains('hidden')) {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            } else {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            }
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!mobileMenu.contains(e.target) && !mobileMenuButton.contains(e.target)) {
+                mobileMenu.classList.add('hidden');
+                const icon = mobileMenuButton.querySelector('i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+        // Prevent menu from closing when clicking inside it
+        mobileMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    </script>
 </body>
 </html>

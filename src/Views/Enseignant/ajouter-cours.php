@@ -1,76 +1,50 @@
 <?php
-session_start();
-
 require_once '../../../vendor/autoload.php';
 
-use App\Controllers\Enseignant\CoursController; 
-use App\Config\Database;
+use App\Config\AuthMiddleware;
+use App\Controllers\Enseignant\CoursController;
 
-// Vérifier la connexion de l'utilisateur (enseignant)
-if (!isset($_SESSION['user_id'])) {
-    header('Location: ../Auth/login.php');
-    exit();
-}
+// Check if the user is authenticated and has the required role (e.g., 'enseignant')
+AuthMiddleware::checkUserRole('Enseignant');
 
-try {
-    $database = new Database();
-    $db = $database->connection();
-    $courseController = new CoursController($db);
+// Initialize the controller
+$courseController = new CoursController();
 
-    // Récupérer les informations de l'utilisateur
-    $requete = $db->prepare("
-        SELECT u.*, r.titre as role_titre 
-        FROM Utilisateurs u 
-        JOIN Role r ON u.role_id = r.role_id
-        WHERE u.id = :id
-    ");
-    $requete->execute([':id' => $_SESSION['user_id']]);
-    $utilisateur = $requete->fetch(PDO::FETCH_ASSOC);
+// Fetch user info, categories, and tags
+$utilisateur = $courseController->getUserInfo(AuthMiddleware::getUserId());
+$categories = $courseController->getCategories();
+$tags = $courseController->getTags();
 
-    // Récupérer les catégories
-    $requeteCategories = $db->query("SELECT category_id, nom FROM Category ORDER BY nom");
-    $categories = $requeteCategories->fetchAll(PDO::FETCH_ASSOC);
+$errors = [];
+$success = '';
 
-    // Récupérer les tags disponibles
-    $requeteTags = $db->query("SELECT tag_id, nom FROM Tag ORDER BY nom");
-    $tags = $requeteTags->fetchAll(PDO::FETCH_ASSOC);
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $titre = trim($_POST['titre'] ?? '');
+    $description = trim($_POST['description'] ?? '');
+    $typeContenu = $_POST['type_contenu'] ?? '';
+    $lienContenu = trim($_POST['lien_contenu'] ?? '');
+    $category_id = isset($_POST['category_id']) ? intval($_POST['category_id']) : 0;
+    $selectedTags = $_POST['tags'] ?? [];
 
-    $errors = [];
-    $success = '';
+    $cours_id = $courseController->createCourse(
+        $titre,
+        $description,
+        $lienContenu,
+        AuthMiddleware::getUserId(), // Use AuthMiddleware to get the user ID
+        $category_id,
+        $typeContenu
+    );
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $titre = trim($_POST['titre'] ?? '');
-        $description = trim($_POST['description'] ?? '');
-        $typeContenu = $_POST['type_contenu'] ?? '';
-        $lienContenu = trim($_POST['lien_contenu'] ?? '');
-        $category_id = isset($_POST['category_id']) ? intval($_POST['category_id']) : 0;
-        $selectedTags = $_POST['tags'] ?? [];
-
-        // Création du cours
-        $cours_id = $courseController->createCourse(
-            $titre,
-            $description,
-            $lienContenu,
-            $_SESSION['user_id'],
-            $category_id,
-            $typeContenu
-        );
-
-        if ($cours_id) {
-            // Ajouter les tags sélectionnés
-            foreach ($selectedTags as $tag_id) {
-                $courseController->addTagToCourse($cours_id, $tag_id);
-            }
-            $success = "Le cours a été créé avec succès!";
-            // Réinitialiser le formulaire
-            $_POST = [];
-        } else {
-            $errors = $courseController->getErrorMessages();
+    if ($cours_id) {
+        foreach ($selectedTags as $tag_id) {
+            $courseController->addTagToCourse($cours_id, $tag_id);
         }
+        $success = "Le cours a été créé avec succès!";
+        $_POST = [];
+    } else {
+        $errors = $courseController->getErrorMessages();
     }
-
-} catch (PDOException $e) {
-    $errors[] = "Erreur de connexion : " . $e->getMessage();
 }
 ?>
 
@@ -80,8 +54,10 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajouter un Cours</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body class="bg-gray-100">
     <div class="flex min-h-screen">
@@ -89,12 +65,12 @@ try {
         <aside class="w-64 bg-blue-600 text-white p-6 space-y-6">
             <!-- Profile Section -->
             <div class="flex items-center space-x-4">
-                <img src="/api/placeholder/48/48" alt="Profile" class="w-12 h-12 rounded-full">
+                <img src="../../../public/assets/depositphotos_747828354-stock-illustration-blue-circular-user-profile-icon.jpg" alt="Profile" class="w-12 h-12 rounded-full">
                 <div>
                     <h2 class="text-lg font-semibold">
                         <?= htmlspecialchars($utilisateur['prenom'] . ' ' . $utilisateur['nom']) ?>
                     </h2>
-                    <p class="text-sm text-gray-300">
+                    <p class="text-sm text-gray-200">
                         <?= htmlspecialchars($utilisateur['role_titre']) ?>
                     </p>
                 </div>
@@ -105,17 +81,26 @@ try {
                 <ul class="space-y-2">
                     <li>
                         <a href="dashboard.php" class="flex items-center space-x-3 py-2 px-4 hover:bg-blue-700 rounded-lg transition duration-300">
+                            <i class="fas fa-home w-5"></i>
                             <span>Tableau de Bord</span>
                         </a>
                     </li>
                     <li>
                         <a href="mes-cours.php" class="flex items-center space-x-3 py-2 px-4 hover:bg-blue-700 rounded-lg transition duration-300">
+                            <i class="fas fa-book w-5"></i>
                             <span>Mes Cours</span>
                         </a>
                     </li>
                     <li>
                         <a href="ajouter-cours.php" class="flex items-center space-x-3 py-2 px-4 bg-blue-700 rounded-lg">
+                            <i class="fas fa-plus-circle w-5"></i>
                             <span>Ajouter un Cours</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../Auth/logout.php" class="flex items-center space-x-3 py-2 px-4 hover:bg-red-500 rounded-lg transition duration-300 text-red-100">
+                            <i class="fas fa-sign-out-alt w-5"></i>
+                            <span>Déconnexion</span>
                         </a>
                     </li>
                 </ul>
@@ -194,17 +179,17 @@ try {
 
                     <!-- Tags -->
                     <div>
-                        <label for="tags" class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
-                        <select id="tags" name="tags[]" multiple
-                                class="select2 w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <?php foreach ($tags as $tag): ?>
-                                <option value="<?= $tag['tag_id'] ?>"
-                                    <?= isset($_POST['tags']) && in_array($tag['tag_id'], $_POST['tags']) ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($tag['nom']) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
+    <label for="tags" class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+    <select id="tags" name="tags[]" multiple
+            class="select2 w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        <?php foreach ($tags as $tag): ?>
+            <option value="<?= $tag['tag_id'] ?>"
+                <?= isset($_POST['tags']) && in_array($tag['tag_id'], $_POST['tags']) ? 'selected' : '' ?>>
+                <?= htmlspecialchars($tag['nom']) ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+</div>
 
                     <!-- Submit Button -->
                     <div class="text-right">
@@ -220,12 +205,12 @@ try {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
-        $(document).ready(function() {
-            $('.select2').select2({
-                placeholder: "Sélectionnez des tags",
-                allowClear: true
-            });
+    $(document).ready(function() {
+        $('.select2').select2({
+            placeholder: "Sélectionnez des tags",
+            allowClear: true
         });
-    </script>
+    });
+</script>
 </body>
 </html>

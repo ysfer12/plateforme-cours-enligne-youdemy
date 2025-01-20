@@ -88,7 +88,8 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($course['titre']) ?> - LearnHub</title>
+    <title><?= htmlspecialchars($course['titre']) ?> - Youdemy</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/feather-icons"></script>
@@ -113,59 +114,123 @@ try {
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
-    <!-- Modern Fixed Header -->
-    <header class="fixed w-full z-50 glass-effect border-b border-gray-200/80">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <!-- Logo -->
-                <a href="index.php" class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <i data-feather="book-open" class="w-6 h-6 text-white"></i>
+<!-- Navigation Bar -->
+<nav class="fixed w-full z-50 glass-effect border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex justify-between items-center h-16">
+            <!-- Logo with Gradient -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-graduation-cap text-2xl text-white"></i>
+                </div>
+                <span class="text-xl md:text-2xl font-bold gradient-text">Youdemy</span>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-gray-600 hover:text-blue-600 focus:outline-none">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+
+            <!-- Enhanced Search Bar - Hidden on Mobile -->
+            <div class="hidden md:flex flex-1 max-w-xl mx-8">
+                <div class="relative w-full">
+                    <input type="text" 
+                           placeholder="Que souhaitez-vous apprendre aujourd'hui ?" 
+                           class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pl-12">
+                    <div class="absolute left-4 top-2.5 text-gray-400">
+                        <i class="fas fa-search"></i>
                     </div>
-                    <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                        LearnHub
-                    </span>
-                </a>
+                    <button class="absolute right-2 top-1 px-4 py-1 bg-blue-600 text-white rounded-full text-sm hover:bg-blue-700 transition">
+                        Rechercher
+                    </button>
+                </div>
+            </div>
 
-                <!-- Desktop Navigation -->
-                <nav class="hidden md:flex items-center space-x-8">
-                    <a href="index.php" class="text-gray-700 hover:text-blue-600 transition-all">Formations</a>
-                    <a href="#" class="text-gray-700 hover:text-blue-600 transition-all">Catégories</a>
-                    <a href="#" class="text-gray-700 hover:text-blue-600 transition-all">Blog</a>
-                </nav>
-
-                <!-- Auth Section -->
-                <div class="flex items-center space-x-4">
-                    <?php if ($userId): ?>
-                        <!-- User Dropdown -->
-                        <div class="relative group">
-                            <button class="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-all">
-                                <div class="w-8 h-8 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg flex items-center justify-center">
-                                    <i data-feather="user" class="w-5 h-5 text-blue-600"></i>
-                                </div>
-                                <i data-feather="chevron-down" class="w-4 h-4"></i>
-                            </button>
-                            <!-- Dropdown Menu -->
-                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200">
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50">Mon profil</a>
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50">Mes cours</a>
-                                <hr class="my-2 border-gray-100">
-                                <a href="logout.php" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-                                    Déconnexion
-                                </a>
-                            </div>
-                        </div>
-                    <?php else: ?>
-                        <a href="../Auth/login.php" class="text-gray-700 hover:text-blue-600 transition-all">Connexion</a>
-                        <a href="../Auth/register.php" class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20">
-                            S'inscrire
+            <!-- Navigation Links - Hidden on Mobile -->
+            <div class="hidden md:flex items-center space-x-8">
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="../Admin/Catalogue/Cours.php" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
+                        <i class="fas fa-book-open text-sm"></i>
+                        <span>Catalogue</span>
+                    </a>
+                    <div class="relative group">
+                        <a href="#" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
+                            <i class="fas fa-th-large text-sm"></i>
+                            <span>Qui sommes nous?</span>
+                            <i class="fas fa-chevron-down text-xs ml-1"></i>
                         </a>
-                    <?php endif; ?>
+                    </div>
+                </div>
+                <!-- Profile Dropdown -->
+                <div class="relative group">
+                    <button class="flex items-center space-x-2 text-gray-600 hover:text-blue-600 focus:outline-none">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-blue-600"></i>
+                        </div>
+                        <i class="fas fa-chevron-down text-xs group-hover:rotate-180 transition-transform duration-200"></i>
+                    </button>
+                    <!-- Dropdown Menu -->
+                    <div class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg py-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200">
+                        <a href="../home.php" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                            <i class="fas fa-book-reader mr-2"></i>
+                            Mes cours
+                        </a>
+                        <hr class="my-2 border-gray-100">
+                        <form method="POST">
+                            <button type="submit" name="submit" class="block px-4 py-2 text-red-600 hover:bg-red-50 transition-colors">
+                                <i class="fas fa-sign-out-alt mr-2"></i>
+                                Déconnexion
+                            </button>
+                        </form> 
+                        </div>
                 </div>
             </div>
         </div>
-    </header>
 
+        <!-- Mobile Menu - Hidden by Default -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white pb-4 absolute top-16 left-0 right-0 border-b border-gray-200 shadow-lg">
+            <!-- Mobile Search -->
+            <div class="px-4 pt-2 pb-3">
+                <div class="relative">
+                    <input type="text" 
+                           placeholder="Rechercher..." 
+                           class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pl-12">
+                    <div class="absolute left-4 top-2.5 text-gray-400">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation Links -->
+            <div class="px-4 pt-2 pb-3 space-y-1">
+                <a href="../Catalogue/Cours.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                    <i class="fas fa-book-open mr-2"></i>
+                    Catalogue
+                </a>
+                <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                    <i class="fas fa-th-large mr-2"></i>
+                    Qui sommes nous?
+                </a>
+                <!-- Mobile Profile Section -->
+                <div class="pt-4 space-y-2">
+                    <div class="px-3 py-2 text-sm text-gray-500">Mon compte</div>
+                    <a href="../Admin/dashboard.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                        <i class="fas fa-book-reader mr-2"></i>
+                        Mes cours
+                    </a>
+                    <form method="POST">
+                        <button type="submit" name="submit" class="block px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50">
+                            <i class="fas fa-sign-out-alt mr-2"></i>
+                            Déconnexion
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
     <!-- Main Content -->
     <main class="flex-grow pt-16">
         <!-- Hero Section -->
@@ -409,45 +474,192 @@ try {
         <?php endif; ?>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-gray-100">
-        <div class="max-w-7xl mx-auto px-4 py-12">
-            <div class="grid md:grid-cols-4 gap-8">
-                <div>
-                    <h4 class="text-xl font-bold text-gray-800 mb-4">LearnHub</h4>
-                    <p class="text-gray-600">Apprenez, grandissez, réussissez.</p>
-                </div>
-                <div>
-                    <h5 class="font-semibold text-gray-800 mb-4">Formations</h5>
-                    <nav class="flex flex-col space-y-2">
-                        <a href="#" class="text-gray-600 hover:text-blue-600">Développement</a>
-                        <a href="#" class="text-gray-600 hover:text-blue-600">Design</a>
-                        <a href="#" class="text-gray-600 hover:text-blue-600">Marketing</a>
-                    </nav>
-                </div>
-                <div>
-                    <h5 class="font-semibold text-gray-800 mb-4">À propos</h5>
-                    <nav class="flex flex-col space-y-2">
-                        <a href="#" class="text-gray-600 hover:text-blue-600">Notre mission</a>
-                        <a href="#" class="text-gray-600 hover:text-blue-600">Nos instructeurs</a>
-                        <a href="#" class="text-gray-600 hover:text-blue-600">Contact</a>
-                    </nav>
-                </div>
-                <div>
-                    <h5 class="font-semibold text-gray-800 mb-4">Légal</h5>
-                    <nav class="flex flex-col space-y-2">
-                        <a href="#" class="text-gray-600 hover:text-blue-600">CGV</a>
-                        <a href="#" class="text-gray-600 hover:text-blue-600">Politique de confidentialité</a>
-                    </nav>
+    <!-- Enhanced Footer with Newsletter -->
+    <footer class="bg-gray-800 text-gray-300">
+        <!-- Newsletter Section -->
+        <div class="border-b border-gray-700">
+            <div class="max-w-7xl mx-auto px-4 py-12">
+                <div class="max-w-3xl mx-auto text-center">
+                    <h3 class="text-2xl font-bold text-white mb-3">Restez informé de nos nouveautés</h3>
+                    <p class="text-gray-400 mb-6">
+                        Recevez nos meilleures offres et conseils pédagogiques directement dans votre boîte mail
+                    </p>
+                    <form class="flex flex-col sm:flex-row gap-4">
+                        <input type="email" 
+                               placeholder="Votre adresse email" 
+                               class="flex-1 px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                            S'abonner
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
-        <div class="border-t border-gray-100 py-6">
-            <div class="max-w-7xl mx-auto px-4 text-center text-gray-600">
-                © <?= date('Y') ?> LearnHub. Tous droits réservés.
+
+        <!-- Main Footer Content -->
+        <div class="max-w-7xl mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
+                <!-- Company Info -->
+                <div class="col-span-2">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-graduation-cap text-2xl text-white"></i>
+                        </div>
+                        <span class="text-2xl font-bold text-white">Youdemy</span>
+                    </div>
+                    <p class="text-gray-400 mb-6">
+                        Youdemy est la plateforme leader de l'apprentissage en ligne, 
+                        offrant des cours de qualité pour développer vos compétences professionnelles.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition">
+                            <i class="fab fa-facebook-f text-white"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition">
+                            <i class="fab fa-twitter text-white"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition">
+                            <i class="fab fa-linkedin-in text-white"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition">
+                            <i class="fab fa-instagram text-white"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="text-white font-semibold text-lg mb-4">Liens rapides</h4>
+                    <ul class="space-y-3">
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                À propos
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Carrières
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Blog
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Devenir formateur
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Affiliations
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Popular Categories -->
+                <div>
+                    <h4 class="text-white font-semibold text-lg mb-4">Catégories</h4>
+                    <ul class="space-y-3">
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Développement Web
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Business & Marketing
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Design & Créativité
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                IA & Data Science
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Développement Personnel
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div>
+                    <h4 class="text-white font-semibold text-lg mb-4">Support</h4>
+                    <ul class="space-y-3">
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Centre d'aide
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Documentation
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Contact
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                FAQ
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-400 hover:text-white transition flex items-center">
+                                <i class="fas fa-chevron-right text-xs mr-2"></i>
+                                Communauté
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom Footer -->
+            <div class="border-t border-gray-700 mt-12 pt-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Copyright -->
+                    <div class="text-gray-400 text-sm">
+                        © 2024 Youdemy. Tous droits réservés.
+                    </div>
+                    
+                    <!-- Legal Links -->
+                    <div class="flex flex-wrap gap-4 text-sm justify-start md:justify-end">
+                        <a href="#" class="text-gray-400 hover:text-white transition">Confidentialité</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">CGU</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">Mentions légales</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">Cookies</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">Accessibilité</a>
+                    </div>
+                </div>
             </div>
         </div>
     </footer>
+
 
     <script>
         // Initialize Feather Icons
@@ -461,6 +673,10 @@ try {
                     behavior: 'smooth'
                 });
             });
+        });
+             // Mobile menu toggle functionality
+             document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
         });
     </script>
 </body>

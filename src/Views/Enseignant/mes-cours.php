@@ -1,65 +1,38 @@
 <?php
-session_start();
-
 require_once '../../../vendor/autoload.php';
 
-use App\Config\Database;
+use App\Config\AuthMiddleware;
 use App\Controllers\Enseignant\CoursController;
-// Vérification de la session
-if (!isset($_SESSION['user_id'])) {
-    header('Location: ../Auth/login.php');
-    exit();
+
+AuthMiddleware::checkUserRole('Enseignant');
+
+$courseController = new CoursController();
+
+$utilisateur = $courseController->getUserInfo(AuthMiddleware::getUserId());
+
+if (!$utilisateur) {
+    die("Erreur: Impossible de récupérer les informations de l'utilisateur.");
 }
 
-try {
-    $database = new Database();
-    $db = $database->connection();
-    $courseController = new CoursController($db);
-
-    // Récupérer l'utilisateur connecté
-    $query = "SELECT u.*, r.titre as role_titre 
-              FROM Utilisateurs u 
-              JOIN Role r ON u.role_id = r.role_id
-              WHERE u.id = :id";
-    $stmt = $db->prepare($query);
-    $stmt->execute([':id' => $_SESSION['user_id']]);
-    $utilisateur = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    // Traitement de la suppression
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
-        $cours_id = (int)$_POST['cours_id'];
-        
-        // Récupérer le type de contenu du cours
-        $query = "SELECT typeContenu FROM Cours WHERE cours_id = :cours_id AND enseignat_id = :enseignat_id";
-        $stmt = $db->prepare($query);
-        $stmt->execute([
-            ':cours_id' => $cours_id,
-            ':enseignat_id' => $_SESSION['user_id']
-        ]);
-        $typeContenu = $stmt->fetchColumn();
-
-        if ($typeContenu) {
-            if ($courseController->deleteCourse($cours_id, $typeContenu)) {
-                $_SESSION['success'] = "Le cours a été supprimé avec succès";
-                header('Location: mes-cours.php');
-                exit();
-            } else {
-                $erreur = "Erreur lors de la suppression du cours";
-            }
-        }
+// Handle course deletion
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
+    $cours_id = (int)$_POST['cours_id'];
+    if ($courseController->deleteCourse($cours_id)) {
+        $_SESSION['success'] = "Le cours a été supprimé avec succès";
+        header('Location: mes-cours.php');
+        exit();
+    } else {
+        $erreur = "Erreur lors de la suppression du cours";
     }
+}
 
-    // Récupérer les cours de l'enseignant
-    $mesCours = $courseController->getCoursesByTeacher($_SESSION['user_id']);
+// Fetch courses for the teacher
+$mesCours = $courseController->getCoursesByTeacher(AuthMiddleware::getUserId());
 
-    // Message de succès
-    if (isset($_SESSION['success'])) {
-        $success = $_SESSION['success'];
-        unset($_SESSION['success']);
-    }
-
-} catch(Exception $e) {
-    $erreur = "Une erreur est survenue : " . $e->getMessage();
+// Success message
+if (isset($_SESSION['success'])) {
+    $success = $_SESSION['success'];
+    unset($_SESSION['success']);
 }
 ?>
 
@@ -78,7 +51,7 @@ try {
         <aside class="w-64 bg-blue-600 text-white p-6 space-y-6">
             <!-- Profile Section -->
             <div class="flex items-center space-x-4">
-                <img src="/api/placeholder/48/48" alt="Profile" class="w-12 h-12 rounded-full">
+                <img src="../../../public/assets/depositphotos_747828354-stock-illustration-blue-circular-user-profile-icon.jpg" alt="Profile" class="w-12 h-12 rounded-full">
                 <div>
                     <h2 class="text-lg font-semibold">
                         <?= htmlspecialchars($utilisateur['prenom'] . ' ' . $utilisateur['nom']) ?>
@@ -182,9 +155,9 @@ try {
                                         <i class="fas fa-eye mr-2"></i>Voir
                                     </a>
                                     <a href="modifier-cours.php?id=<?= $cours['cours_id'] ?>" 
-                                       class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">
-                                        <i class="fas fa-edit mr-2"></i>Éditer
-                                    </a>
+   class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">
+    <i class="fas fa-edit mr-2"></i>Éditer
+</a>
                                     <button onclick="confirmDelete(<?= $cours['cours_id'] ?>)" 
                                             class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-300">
                                         <i class="fas fa-trash mr-2"></i>Supprimer
@@ -233,7 +206,6 @@ try {
             document.getElementById('deleteModal').classList.remove('flex');
         }
 
-        // Fermer le modal si on clique en dehors
         window.onclick = function(event) {
             const modal = document.getElementById('deleteModal');
             if (event.target == modal) {
