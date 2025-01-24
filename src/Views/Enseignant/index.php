@@ -92,7 +92,7 @@ AuthMiddleware::checkUserRole('Enseignant');
                 <!-- Navigation Links -->
                 <div class="flex items-center space-x-8">
                     <div class="hidden md:flex items-center space-x-6">
-                        <a href="../Views/Cours/Cours.php" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
+                        <a href="../Cours/Cours.php" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
                             <i class="fas fa-book-open text-sm"></i>
                             <span>Catalogue</span>
                         </a>
@@ -210,14 +210,14 @@ AuthMiddleware::checkUserRole('Enseignant');
                 <!-- Course Card 1 -->
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
                     <div class="relative">
-                        <img src="../../public/assets/depositphotos_68471565-stock-illustration-online-communication-education-and-social.jpg" alt="Course" class="w-full h-48 object-cover">
+                        <img src="../../../public/assets/depositphotos_68471565-stock-illustration-online-communication-education-and-social.jpg" alt="Course" class="w-full h-48 object-cover">
                         <div class="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
                             Bestseller
                         </div>
                     </div>
                     <div class="p-6">
                         <div class="flex items-center space-x-2 mb-4">
-                            <img src="../../public/assets/depositphotos_68471565-stock-illustration-online-communication-education-and-social.jpg" alt="Instructor" class="w-8 h-8 rounded-full">
+                            <img src="../../../assets/depositphotos_68471565-stock-illustration-online-communication-education-and-social.jpg" alt="Instructor" class="w-8 h-8 rounded-full">
                             <span class="text-sm text-gray-600">John Doe</span>
                         </div>
                         <h3 class="font-semibold text-xl mb-2">Développement Web Full Stack</h3>
@@ -244,7 +244,7 @@ AuthMiddleware::checkUserRole('Enseignant');
                 <!-- Course Card 2 -->
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
                     <div class="relative">
-                        <img src="../../public/assets/depositphotos_68471565-stock-illustration-online-communication-education-and-social.jpg" alt="Course" class="w-full h-48 object-cover">
+                        <img src="../../../public/assets/depositphotos_68471565-stock-illustration-online-communication-education-and-social.jpg" alt="Course" class="w-full h-48 object-cover">
                         <div class="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 rounded-full text-sm">
                             Nouveau
                         </div>
@@ -278,7 +278,7 @@ AuthMiddleware::checkUserRole('Enseignant');
                 <!-- Course Card 3 -->
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
                     <div class="relative">
-                        <img src="../../public/assets/depositphotos_68471565-stock-illustration-online-communication-education-and-social.jpg" alt="Course" class="w-full h-48 object-cover">
+                        <img src="../../../public/assets/depositphotos_68471565-stock-illustration-online-communication-education-and-social.jpg" alt="Course" class="w-full h-48 object-cover">
                         <div class="absolute top-4 right-4 bg-purple-600 text-white px-3 py-1 rounded-full text-sm">
                             Populaire
                         </div>

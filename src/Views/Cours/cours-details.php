@@ -1,98 +1,103 @@
 <?php
+// Start the session
 session_start();
 
-// Database Configuration
-$host = "localhost";
-$dbname = "Youdemy";
-$username = "root";
-$password = "";
+// Include the necessary files (autoload or manual includes)
+require_once '../../../vendor/autoload.php';
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+// Instantiate the controller
+$coursController = new App\Controllers\Catalogue\CoursController();
 
-    $courseId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-    if (!$courseId) {
-        header('Location: index.php');
-        exit;
-    }
+// Get the course ID from the URL
+$courseId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-    $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
-
-    // Main Course Query
-    $query = "
-        SELECT c.*, 
-               cat.nom as category_name,
-               GROUP_CONCAT(DISTINCT t.nom) as tag_names,
-               u.prenom, u.nom as nom_enseignant, u.email as email_enseignant,
-               COUNT(DISTINCT i.etudiant_id) as nombre_inscrits,
-               TIMESTAMPDIFF(MONTH, c.dateAjout, CURRENT_TIMESTAMP) as months_since_creation,
-               c.typeContenu,
-               c.lienContenu
-        FROM Cours c
-        LEFT JOIN Category cat ON c.category_id = cat.category_id
-        LEFT JOIN Cours_Tags ct ON c.cours_id = ct.cours_id
-        LEFT JOIN Tag t ON ct.tag_id = t.tag_id
-        LEFT JOIN Utilisateurs u ON c.enseignat_id = u.id
-        LEFT JOIN Inscriptions i ON c.cours_id = i.cours_id
-        WHERE c.cours_id = :cours_id 
-        GROUP BY c.cours_id";
-
-    $stmt = $pdo->prepare($query);
-    $stmt->bindParam(':cours_id', $courseId);
-    $stmt->execute();
-    $course = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$course) {
-        header('Location: index.php');
-        exit;
-    }
-
-    $tags = !empty($course['tag_names']) ? explode(',', $course['tag_names']) : [];
-
-    // Check Enrollment
-    $isEnrolled = false;
-    if ($userId) {
-        $enrollQuery = "SELECT COUNT(*) as enrolled FROM Inscriptions 
-                       WHERE cours_id = :cours_id AND etudiant_id = :etudiant_id";
-        $enrollStmt = $pdo->prepare($enrollQuery);
-        $enrollStmt->bindParam(':cours_id', $courseId);
-        $enrollStmt->bindParam(':etudiant_id', $userId);
-        $enrollStmt->execute();
-        $isEnrolled = $enrollStmt->fetch(PDO::FETCH_ASSOC)['enrolled'] > 0;
-    }
-
-    // Fetch Similar Courses
-    $similarQuery = "
-        SELECT c.cours_id, c.titre, c.description, cat.nom as category_name,
-               u.prenom, u.nom as nom_enseignant
-        FROM Cours c
-        LEFT JOIN Category cat ON c.category_id = cat.category_id
-        LEFT JOIN Utilisateurs u ON c.enseignat_id = u.id
-        WHERE c.category_id = :category_id 
-        AND c.cours_id != :cours_id
-        LIMIT 3";
-    
-    $similarStmt = $pdo->prepare($similarQuery);
-    $similarStmt->bindParam(':category_id', $course['category_id']);
-    $similarStmt->bindParam(':cours_id', $courseId);
-    $similarStmt->execute();
-    $similarCourses = $similarStmt->fetchAll(PDO::FETCH_ASSOC);
-
-} catch(PDOException $e) {
-    die("Erreur de connexion : " . $e->getMessage());
+// Redirect to the homepage if the course ID is invalid
+if (!$courseId) {
+    header('Location: index.php');
+    exit;
 }
+
+// Initialize $userId
+$userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+
+// Fetch course details using the controller
+$course = $coursController->getCourseDetails($courseId, $userId);
+
+// Redirect to the homepage if the course is not found
+if (!$course) {
+    header('Location: index.php');
+    exit;
+}
+
+// Extract tags if they exist
+$tags = !empty($course['tag_names']) ? explode(',', $course['tag_names']) : [];
+
+// Check if the user is enrolled in the course
+$isEnrolled = $course['is_inscrit'] ?? false;
+
+// Fetch similar courses
+$similarCourses = $coursController->getSimilarCourses($course['category_id'], $courseId);
 ?>
+
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($course['titre']) ?> - LearnHub</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, #3B82F6, #2563EB);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .testimonial-card {
+            transition: all 0.3s ease;
+        }
+
+        .testimonial-card:hover {
+            transform: scale(1.02);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
@@ -113,72 +118,111 @@ try {
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
-    <!-- Modern Fixed Header -->
-    <header class="fixed w-full z-50 glass-effect border-b border-gray-200/80">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Navigation Bar -->
+    <nav class="fixed w-full z-50 glass-effect border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-16">
-                <!-- Logo -->
-                <a href="index.php" class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <i data-feather="book-open" class="w-6 h-6 text-white"></i>
+                <!-- Logo with Gradient -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-2xl text-white"></i>
                     </div>
-                    <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                        LearnHub
-                    </span>
-                </a>
+                    <span class="text-xl md:text-2xl font-bold gradient-text">Youdemy</span>
+                </div>
 
-                <!-- Desktop Navigation -->
-                <nav class="hidden md:flex items-center space-x-8">
-                    <a href="index.php" class="text-gray-700 hover:text-blue-600 transition-all">Formations</a>
-                    <a href="#" class="text-gray-700 hover:text-blue-600 transition-all">Catégories</a>
-                    <a href="#" class="text-gray-700 hover:text-blue-600 transition-all">Blog</a>
-                </nav>
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-gray-600 hover:text-blue-600 focus:outline-none">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
 
-                <!-- Auth Section -->
-                <div class="flex items-center space-x-4">
-                    <?php if ($userId): ?>
-                        <!-- User Dropdown -->
-                        <div class="relative group">
-                            <button class="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-all">
-                                <div class="w-8 h-8 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg flex items-center justify-center">
-                                    <i data-feather="user" class="w-5 h-5 text-blue-600"></i>
-                                </div>
-                                <i data-feather="chevron-down" class="w-4 h-4"></i>
-                            </button>
-                            <!-- Dropdown Menu -->
-                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200">
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50">Mon profil</a>
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50">Mes cours</a>
-                                <hr class="my-2 border-gray-100">
-                                <a href="logout.php" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-                                    Déconnexion
-                                </a>
-                            </div>
+                <!-- Enhanced Search Bar - Hidden on Mobile -->
+                <div class="hidden md:flex flex-1 max-w-xl mx-8">
+                    <div class="relative w-full">
+                        <input type="text" 
+                               placeholder="Que souhaitez-vous apprendre aujourd'hui ?" 
+                               class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pl-12">
+                        <div class="absolute left-4 top-2.5 text-gray-400">
+                            <i class="fas fa-search"></i>
                         </div>
-                    <?php else: ?>
-                        <a href="../Auth/login.php" class="text-gray-700 hover:text-blue-600 transition-all">Connexion</a>
-                        <a href="../Auth/register.php" class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20">
-                            S'inscrire
+                        <button class="absolute right-2 top-1 px-4 py-1 bg-blue-600 text-white rounded-full text-sm hover:bg-blue-700 transition">
+                            Rechercher
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Navigation Links - Hidden on Mobile -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <div class="hidden md:flex items-center space-x-6">
+                        <a href="../Views/Cours/Cours.php" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
+                            <i class="fas fa-book-open text-sm"></i>
+                            <span>Catalogue</span>
                         </a>
-                    <?php endif; ?>
+                        <div class="relative group">
+                            <a href="#" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
+                                <i class="fas fa-th-large text-sm"></i>
+                                <span>Qui sommes nous?</span>
+                                <i class="fas fa-chevron-down text-xs ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <a href="../Views/Auth/login.php" class="px-4 py-2 text-blue-600 rounded-lg hover:bg-blue-50 transition">
+                            Connexion
+                        </a>
+                        <a href="../Views/Auth/registre.php" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
+                            Inscription
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Menu - Hidden by Default -->
+            <div id="mobile-menu" class="hidden md:hidden bg-white pb-4 absolute top-16 left-0 right-0 border-b border-gray-200 shadow-lg">
+                <!-- Mobile Search -->
+                <div class="px-4 pt-2 pb-3">
+                    <div class="relative">
+                        <input type="text" 
+                               placeholder="Rechercher..." 
+                               class="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pl-12">
+                        <div class="absolute left-4 top-2.5 text-gray-400">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Navigation Links -->
+                <div class="px-4 pt-2 pb-3 space-y-1">
+                    <a href="../Views/Cours/Cours.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                        <i class="fas fa-book-open mr-2"></i>
+                        Catalogue
+                    </a>
+                    <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                        <i class="fas fa-th-large mr-2"></i>
+                        Qui sommes nous?
+                    </a>
+                    <div class="pt-4 flex flex-col space-y-2">
+                        <a href="../Views/Auth/login.php" class="px-4 py-2 text-center text-blue-600 rounded-lg border border-blue-600 hover:bg-blue-50 transition">
+                            Connexion
+                        </a>
+                        <a href="../Views/Auth/registre.php" class="px-4 py-2 text-center bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
+                            Inscription
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-    </header>
+    </nav>
 
-    <!-- Main Content -->
-    <main class="flex-grow pt-16">
+<!-- Main Content -->
+<main class="flex-grow pt-16">
         <!-- Hero Section -->
         <section class="relative bg-gradient-to-br from-blue-600 to-indigo-700 py-20 px-4">
-            <!-- Decorative Background -->
-            <div class="absolute inset-0 overflow-hidden">
-                <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M54.627 0l.83.828-1.415 1.415L51.8 0h2.827zM5.373 0l-.83.828L5.96 2.243 8.2 0H5.374zM48.97 0l3.657 3.657-1.414 1.414L46.143 0h2.828zM11.03 0L7.372 3.657 8.787 5.07 13.857 0H11.03zm32.284 0L49.8 6.485 48.384 7.9l-7.9-7.9h2.83zM16.686 0L10.2 6.485 11.616 7.9l7.9-7.9h-2.83zM22.344 0L13.858 8.485 15.272 9.9l9.9-9.9h-2.828zM32.57 0L22.344 10.227 23.758 11.64l10.827-10.826h-2.015zm8.485 0L29.828 11.227l1.414 1.414L42.47 0h-1.415zM56.97 0L44.343 12.627l1.414 1.414L58.385 1.414 56.97 0zM3.03 0L.616 2.414l2.828 2.83L15.272 17.07l1.414-1.414L4.444 3.414 3.03 0zm50.912 0L52.93 2.414l2.827 2.83L67.585 17.07l1.414-1.414L55.757 3.414 53.942 0zM25.172 0L36 10.828 37.414 9.414 26.586 0h-1.414zM.284 0L0 .283v1.414L11.414 13.11l1.414-1.413L2 .83.284 0zM39.03 0L40.442 1.414 52.857 13.83l1.415-1.414L42.443 0h-3.414zm-30.886 0l12.85 12.85 1.414-1.414L9.294 0h-1.15zm12.85 0l12.85 12.85 1.415-1.414L21.308 0h-1.15zm12.85 0l12.85 12.85 1.415-1.414L33.322 0h-1.15zm12.85 0L58.86 12.85l1.414-1.414L45.336 0h-1.15z\' fill=\'%23ffffff\' fill-opacity=\'1\' fill-rule=\'evenodd\'/%3E%3C/svg%3E');"></div>
-            </div>
-
-            <!-- Content -->
+            <!-- Course Info -->
             <div class="max-w-7xl mx-auto relative z-10">
                 <div class="grid md:grid-cols-2 gap-12 items-center">
-                    <!-- Course Info -->
+                    <!-- Course Details -->
                     <div>
                         <!-- Category & Tags -->
                         <div class="flex flex-wrap items-center gap-3 mb-6">
@@ -448,7 +492,6 @@ try {
             </div>
         </div>
     </footer>
-
     <script>
         // Initialize Feather Icons
         feather.replace();
@@ -461,6 +504,40 @@ try {
                     behavior: 'smooth'
                 });
             });
+        });
+
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuButton.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent event from bubbling up
+            mobileMenu.classList.toggle('hidden');
+            
+            // Update the icon
+            const icon = mobileMenuButton.querySelector('i');
+            if (mobileMenu.classList.contains('hidden')) {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            } else {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            }
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!mobileMenu.contains(e.target) && !mobileMenuButton.contains(e.target)) {
+                mobileMenu.classList.add('hidden');
+                const icon = mobileMenuButton.querySelector('i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+        // Prevent menu from closing when clicking inside it
+        mobileMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
         });
     </script>
 </body>

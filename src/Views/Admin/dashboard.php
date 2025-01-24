@@ -22,29 +22,9 @@ $growth = $dashboardController->getGrowthPercentages();
 // Get recent activities
 $recentActivities = $dashboardController->getRecentActivities();
 
-// Helper function for growth class
-function getGrowthClass($percentage) {
-    return $percentage >= 0 ? 'text-green-500 bg-green-100' : 'text-red-500 bg-red-100';
-}
-
-function formatTimeAgo($datetime) {
-    $timestamp = strtotime($datetime);
-    $now = time();
-    $diff = $now - $timestamp;
-
-    if ($diff < 60) {
-        return "Il y a quelques secondes";
-    } elseif ($diff < 3600) {
-        $minutes = floor($diff / 60);
-        return "Il y a " . $minutes . " minute" . ($minutes > 1 ? 's' : '');
-    } elseif ($diff < 86400) {
-        $hours = floor($diff / 3600);
-        return "Il y a " . $hours . " heure" . ($hours > 1 ? 's' : '');
-    } else {
-        $days = floor($diff / 86400);
-        return "Il y a " . $days . " jour" . ($days > 1 ? 's' : '');
-    }
-}
+// Get top courses and teachers
+$topCourses = $dashboardController->getTopCourses();
+$topTeachers = $dashboardController->getTopTeachers();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -178,7 +158,7 @@ function formatTimeAgo($datetime) {
                         <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                             <i class="fas fa-user-graduate text-xl text-blue-500"></i>
                         </div>
-                        <span class="text-sm font-medium <?php echo getGrowthClass($growth['students']); ?> px-2 py-1 rounded">
+                        <span class="text-sm font-medium <?php echo $dashboardController->getGrowthClass($growth['students']); ?> px-2 py-1 rounded">
                             <?php echo ($growth['students'] >= 0 ? '+' : '') . $growth['students']; ?>%
                         </span>
                     </div>
@@ -192,12 +172,56 @@ function formatTimeAgo($datetime) {
                         <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
                             <i class="fas fa-chalkboard-teacher text-xl text-purple-500"></i>
                         </div>
-                        <span class="text-sm font-medium <?php echo getGrowthClass($growth['teachers']); ?> px-2 py-1 rounded">
+                        <span class="text-sm font-medium <?php echo $dashboardController->getGrowthClass($growth['teachers']); ?> px-2 py-1 rounded">
                             <?php echo ($growth['teachers'] >= 0 ? '+' : '') . $growth['teachers']; ?>%
                         </span>
                     </div>
                     <h3 class="text-2xl font-bold mt-4"><?php echo number_format($teachersCount); ?></h3>
                     <p class="text-gray-600">Enseignants</p>
+                </div>
+            </div>
+
+            <!-- Top Courses Section -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                <h3 class="text-lg font-bold mb-4">Top 3 Cours</h3>
+                <div class="space-y-4">
+                    <?php foreach ($topCourses as $course): ?>
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center bg-green-100">
+                                <i class="fas fa-book text-green-500"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-medium">
+                                    <?php echo htmlspecialchars($course['titre']); ?>
+                                </p>
+                                <p class="text-sm text-gray-500">
+                                    <?php echo $course['Inscriptions']; ?> inscriptions
+                                </p>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <!-- Top Teachers Section -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                <h3 class="text-lg font-bold mb-4">Top 3 Enseignants</h3>
+                <div class="space-y-4">
+                    <?php foreach ($topTeachers as $teacher): ?>
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center bg-yellow-100">
+                                <i class="fas fa-chalkboard-teacher text-yellow-500"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-medium">
+                                    <?php echo htmlspecialchars("{$teacher['prenom']} {$teacher['nom']}"); ?>
+                                </p>
+                                <p class="text-sm text-gray-500">
+                                    <?php echo $teacher['courses']; ?> cours
+                                </p>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
 
@@ -217,7 +241,7 @@ function formatTimeAgo($datetime) {
                                     s'est inscrit(e) en tant que <?php echo strtolower(htmlspecialchars($activity['role'])); ?>
                                 </p>
                                 <p class="text-sm text-gray-500">
-                                    <?php echo formatTimeAgo($activity['date']); ?>
+                                    <?php echo $dashboardController->formatTimeAgo($activity['date']); ?>
                                 </p>
                             </div>
                         </div>

@@ -1,7 +1,7 @@
 <?php
-namespace App\Controllers;
+namespace App\Controllers\Etudiant;
 
-use App\Models\EtudiantModel;
+use App\Models\Etudiant\EtudiantModel;
 
 class EtudiantController{
     private $db;

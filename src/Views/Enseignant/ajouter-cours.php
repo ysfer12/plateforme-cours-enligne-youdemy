@@ -3,14 +3,16 @@ require_once '../../../vendor/autoload.php';
 
 use App\Config\AuthMiddleware;
 use App\Controllers\Enseignant\CoursController;
-
-// Check if the user is authenticated and has the required role (e.g., 'enseignant')
+use App\Controllers\Enseignant\UserController;
 AuthMiddleware::checkUserRole('Enseignant');
 
-// Initialize the controller
+$userController = new UserController();
+if (isset($_POST['submit'])) {
+    $userController->logout();
+}
+
 $courseController = new CoursController();
 
-// Fetch user info, categories, and tags
 $utilisateur = $courseController->getUserInfo(AuthMiddleware::getUserId());
 $categories = $courseController->getCategories();
 $tags = $courseController->getTags();
@@ -18,7 +20,6 @@ $tags = $courseController->getTags();
 $errors = [];
 $success = '';
 
-// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $titre = trim($_POST['titre'] ?? '');
     $description = trim($_POST['description'] ?? '');
@@ -31,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $titre,
         $description,
         $lienContenu,
-        AuthMiddleware::getUserId(), // Use AuthMiddleware to get the user ID
+        AuthMiddleware::getUserId(), 
         $category_id,
         $typeContenu
     );
@@ -98,10 +99,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </a>
                     </li>
                     <li>
-                        <a href="../Auth/logout.php" class="flex items-center space-x-3 py-2 px-4 hover:bg-red-500 rounded-lg transition duration-300 text-red-100">
-                            <i class="fas fa-sign-out-alt w-5"></i>
-                            <span>Déconnexion</span>
-                        </a>
+                    <form action="" method="post">
+                            <button type="submit" name ="submit" class="flex items-center space-x-3 py-2 px-4 hover:bg-red-500 rounded-lg transition duration-300 text-red-100">
+                                <i class="fas fa-sign-out-alt w-5"></i>
+                                <span>Déconnexion</span>
+                            </button>
+                        </form>
                     </li>
                 </ul>
             </nav>

@@ -6,12 +6,11 @@ class CoursController {
     private $model;
     private $coursParPage = 6;
 
-    public function __construct(CoursModel $model) {
-        $this->model = $model;
+    public function __construct(CoursModel $model = null) {
+        $this->model = $model ?? new CoursModel();
     }
 
     public function index() {
-        // Get search parameters
         $search = isset($_GET['search']) ? trim($_GET['search']) : '';
         $category = isset($_GET['category']) ? (int)$_GET['category'] : 0;
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -32,5 +31,13 @@ class CoursController {
 ];
 
         return $viewData;
+    }
+
+    public function getCourseDetails($courseId, $userId = null) {
+        return $this->model->getCourseDetails($courseId, $userId);
+    }
+
+    public function getSimilarCourses($categoryId, $excludeCourseId, $limit = 3) {
+        return $this->model->getSimilarCourses($categoryId, $excludeCourseId, $limit);
     }
 }

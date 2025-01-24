@@ -1,9 +1,10 @@
 <?php
 namespace App\Models\Enseignant;
+
 use App\Classes\Cours;
 
 class VideoCours extends Cours
-{    
+{
     public function __construct(
         $db,
         $titre = null,
@@ -27,7 +28,6 @@ class VideoCours extends Cours
 
     public function createCourse()
     {
-        // Validation spécifique pour les cours vidéo
         if (!$this->validateVideoCourse()) {
             return false;
         }
@@ -83,24 +83,22 @@ class VideoCours extends Cours
     {
         $errors = parent::validateCourse();
 
-        // Validation spécifique pour les vidéos
         if (!empty($this->lienContenu)) {
             if (!filter_var($this->lienContenu, FILTER_VALIDATE_URL)) {
                 $errors[] = "Le lien de la vidéo doit être une URL valide";
             }
-            
-            // Vérifier si c'est une URL YouTube ou une autre plateforme vidéo acceptée
+
             $validDomains = ['youtube.com', 'youtu.be', 'vimeo.com'];
             $domain = parse_url($this->lienContenu, PHP_URL_HOST);
             $isValidDomain = false;
-            
+
             foreach ($validDomains as $validDomain) {
                 if (strpos($domain, $validDomain) !== false) {
                     $isValidDomain = true;
                     break;
                 }
             }
-            
+
             if (!$isValidDomain) {
                 $errors[] = "Le lien doit provenir d'une plateforme vidéo acceptée (YouTube, Vimeo)";
             }

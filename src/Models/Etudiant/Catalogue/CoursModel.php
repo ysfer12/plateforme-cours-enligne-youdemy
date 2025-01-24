@@ -11,7 +11,6 @@ class CoursModel {
         $this->conn = $db->connection();
     }
 
-
     public function getCategories() {
         $query = "SELECT * FROM Category ORDER BY nom";
         $stmt = $this->conn->query($query);
@@ -97,5 +96,30 @@ class CoursModel {
         
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getCoursById($coursId, $userId = null) {
+        $query = "
+            SELECT c.*, cat.nom as category_name,
+                   GROUP_CONCAT(DISTINCT t.nom) as tag_names,
+                   u.prenom, u.nom as nom_enseignant,
+                   COUNT(DISTINCT i.etudiant_id) as nombre_inscrits,
+                   CASE WHEN ui.cours_id IS NOT NULL THEN 1 ELSE 0 END as is_inscrit
+            FROM Cours c
+            LEFT JOIN Category cat ON c.category_id = cat.category_id
+            LEFT JOIN Cours_Tags ct ON c.cours_id = ct.cours_id
+            LEFT JOIN Tag t ON ct.tag_id = t.tag_id
+            LEFT JOIN Utilisateurs u ON c.enseignat_id = u.id
+            LEFT JOIN Inscriptions i ON c.cours_id = i.cours_id
+            LEFT JOIN Inscriptions ui ON c.cours_id = ui.cours_id AND ui.etudiant_id = :user_id
+            WHERE c.cours_id = :cours_id
+            GROUP BY c.cours_id
+        ";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':cours_id', $coursId, PDO::PARAM_INT);
+        $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }

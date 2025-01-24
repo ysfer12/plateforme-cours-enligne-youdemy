@@ -1,5 +1,5 @@
 <?php
-namespace App\Models;
+namespace App\Models\Etudiant;
 
 class EtudiantModel {
     private $db;

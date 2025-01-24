@@ -3,8 +3,13 @@ require_once '../../../vendor/autoload.php';
 
 use App\Config\AuthMiddleware;
 use App\Controllers\Enseignant\CoursController;
-
+use App\Controllers\Enseignant\UserController;
 AuthMiddleware::checkUserRole('Enseignant');
+
+$userController = new UserController();
+if (isset($_POST['submit'])) {
+    $userController->logout();
+}
 
 $courseController = new CoursController();
 
@@ -84,10 +89,12 @@ if (isset($_SESSION['success'])) {
                         </a>
                     </li>
                     <li>
-                        <a href="../Auth/logout.php" class="flex items-center space-x-3 py-2 px-4 hover:bg-red-500 rounded-lg transition duration-300 text-red-100">
-                            <i class="fas fa-sign-out-alt w-5"></i>
-                            <span>Déconnexion</span>
-                        </a>
+                    <form action="" method="post">
+                            <button type="submit" name ="submit" class="flex items-center space-x-3 py-2 px-4 hover:bg-red-500 rounded-lg transition duration-300 text-red-100">
+                                <i class="fas fa-sign-out-alt w-5"></i>
+                                <span>Déconnexion</span>
+                            </button>
+                        </form>
                     </li>
                 </ul>
             </nav>

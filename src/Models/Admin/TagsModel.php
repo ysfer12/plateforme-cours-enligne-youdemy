@@ -41,19 +41,16 @@ class TagsModel {
     }
 
     public function addTag($nom) {
-        // Check if tag already exists
         $checkQuery = "SELECT tag_id FROM Tag WHERE LOWER(nom) = LOWER(:nom)";
         $checkStmt = $this->conn->prepare($checkQuery);
         $checkStmt->bindParam(":nom", $nom);
         $checkStmt->execute();
         
-        // If tag exists, return its ID
         if ($checkStmt->rowCount() > 0) {
             $existingTag = $checkStmt->fetch(PDO::FETCH_ASSOC);
             return new Tags($existingTag['tag_id'], $nom);
         }
         
-        // If tag doesn't exist, insert it
         $query = "INSERT INTO Tag (nom) VALUES (:nom)";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":nom", $nom);

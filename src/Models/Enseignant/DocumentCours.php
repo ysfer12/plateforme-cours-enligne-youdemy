@@ -1,5 +1,6 @@
 <?php
 namespace App\Models\Enseignant;
+
 use App\Classes\Cours;
 
 class DocumentCours extends Cours
@@ -27,11 +28,10 @@ class DocumentCours extends Cours
 
     public function createCourse()
     {
-        // Validation spécifique pour les documents
         if (!$this->validateDocumentCourse()) {
             return false;
         }
-
+    
         $query = "INSERT INTO Cours (
             titre, 
             description, 
@@ -49,7 +49,7 @@ class DocumentCours extends Cours
             :category_id,
             :dateAjout
         )";
-
+    
         $stmt = $this->getDb()->prepare($query);
         $stmt->bindValue(':titre', $this->getTitre());
         $stmt->bindValue(':description', $this->getDescription());
@@ -58,10 +58,14 @@ class DocumentCours extends Cours
         $stmt->bindValue(':enseignat_id', $this->getEnseignantId());
         $stmt->bindValue(':category_id', $this->getCategoryId());
         $stmt->bindValue(':dateAjout', $this->getDateAjout());
-
-        return $stmt->execute();
+    
+        if ($stmt->execute()) {
+            return $this->getDb()->lastInsertId(); // Return the course ID
+        } else {
+            return false;
+        }
     }
-
+    
     public static function fetchCourse($db)
     {
         $query = "SELECT c.*,
@@ -83,16 +87,14 @@ class DocumentCours extends Cours
     {
         $errors = parent::validateCourse();
 
-        // Validation spécifique pour les documents
         if (!empty($this->lienContenu)) {
             if (!filter_var($this->lienContenu, FILTER_VALIDATE_URL)) {
                 $errors[] = "Le lien du document doit être une URL valide";
             }
-            
-            // Vérifier l'extension du fichier
+
             $extension = strtolower(pathinfo($this->lienContenu, PATHINFO_EXTENSION));
             $allowedExtensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'];
-            
+
             if (!in_array($extension, $allowedExtensions)) {
                 $errors[] = "Le type de document n'est pas accepté. Extensions autorisées : " . implode(', ', $allowedExtensions);
             }

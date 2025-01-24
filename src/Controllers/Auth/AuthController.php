@@ -6,7 +6,7 @@ use App\Config\Database;
 use App\Models\UserModel;
 use PDO;
 
-session_start(); // Start the session
+session_start();
 
 class AuthController {
     public function login($email, $mot_de_passe) {
@@ -25,7 +25,6 @@ class AuthController {
             exit();
         }
         
-        // Set session variables for the user
         $_SESSION['user_id'] = $user->getId();
         $_SESSION['user_email'] = $user->getEmail();
         $_SESSION['user_prenom'] = $user->getPrenom();
@@ -37,7 +36,6 @@ class AuthController {
             
             switch ($role->getTitre()) {
                 case "Admin":
-                    // Specifically set admin session variable
                     $_SESSION['admin_id'] = $user->getId();
                     header("Location: ../Admin/index.php");
                     break;
@@ -58,8 +56,7 @@ class AuthController {
             header("Location: login.php");
             exit();
         }
-    }
-    
+    }    
     public function logout() {
         session_unset();
         session_destroy();

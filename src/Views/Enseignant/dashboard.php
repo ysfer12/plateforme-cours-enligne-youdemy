@@ -2,11 +2,16 @@
 require_once '../../../vendor/autoload.php';
 
 use App\Controllers\Enseignant\DashboardController;
+use App\Controllers\Enseignant\UserController;
 
+$userController = new UserController();
+if (isset($_POST['submit'])) {
+    $userController->logout();
+}
 $controller = new DashboardController();
 $viewData = $controller->index();
 
-// Initialize default values
+
 $utilisateur = $viewData['utilisateur'] ?? null;
 $statCours = $viewData['statCours'] ?? ['total_cours' => 0];
 $statEtudiants = $viewData['statEtudiants'] ?? ['total_etudiants' => 0];
@@ -15,7 +20,6 @@ $coursRecents = $viewData['coursRecents'] ?? [];
 $erreur = $viewData['erreur'] ?? null;
 
 
-// View content starts here
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -65,10 +69,12 @@ $erreur = $viewData['erreur'] ?? null;
                         </a>
                     </li>
                     <li>
-                        <a href="../Auth/logout.php" class="flex items-center space-x-3 py-2 px-4 hover:bg-red-500 rounded-lg transition duration-300 text-red-100">
-                            <i class="fas fa-sign-out-alt w-5"></i>
-                            <span>Déconnexion</span>
-                        </a>
+                        <form action="" method="post">
+                            <button type="submit" name ="submit" class="flex items-center space-x-3 py-2 px-4 hover:bg-red-500 rounded-lg transition duration-300 text-red-100">
+                                <i class="fas fa-sign-out-alt w-5"></i>
+                                <span>Déconnexion</span>
+                            </button>
+                        </form>
                     </li>
                 </ul>
             </nav>

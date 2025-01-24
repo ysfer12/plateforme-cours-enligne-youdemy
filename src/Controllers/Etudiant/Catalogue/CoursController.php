@@ -54,7 +54,6 @@ class CoursController {
         return $cours;
     }
 
-  
     public function inscrireCours($coursId, $userId) {
         $coursId = (int)$coursId;
         $userId = (int)$userId;
@@ -75,4 +74,26 @@ class CoursController {
 
         return $validatedFilters;
     }
+
+    public function handleRequest() {
+        $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+        $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+        $categoryId = isset($_GET['category']) ? (int)$_GET['category'] : 0;
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+        $courses = $this->coursModel->getCourses($userId, $search, $categoryId, $page);
+        $categories = $this->coursModel->getCategories();
+        $totalCourses = $this->coursModel->countCourses($search, $categoryId);
+        $totalPages = ceil($totalCourses / 9);
+
+        return [
+            'courses' => $courses,
+            'categories' => $categories,
+            'search' => $search,
+            'categoryId' => $categoryId,
+            'page' => $page,
+            'totalPages' => $totalPages
+        ];
+    }
+    
 }

@@ -1,7 +1,7 @@
 <?php
 require_once '../../../vendor/autoload.php';
 use App\Config\Database;
-use App\Controllers\EtudiantController;
+use App\Controllers\Etudiant\EtudiantController;
 use App\Controllers\Auth\AuthController;
 use App\Config\AuthMiddleware;
 AuthMiddleware::checkUserRole('Etudiant');

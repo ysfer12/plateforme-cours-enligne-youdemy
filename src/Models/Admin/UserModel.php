@@ -20,7 +20,6 @@ class UserModel {
     }
 
 
-    // Get active users with pagination (not soft deleted)
     public function getActiveUsers($page = 1, $perPage = 10) {
         $offset = ($page - 1) * $perPage;
         
@@ -55,14 +54,12 @@ class UserModel {
         return $users;
     }
 
-    // Get total count of active users
     public function getTotalActiveUsers() {
         $query = "SELECT COUNT(*) FROM Utilisateurs WHERE dateSuppression IS NULL";
         $stmt = $this->conn->query($query);
         return $stmt->fetchColumn();
     }
 
-    // Soft delete a user
     public function softDelete($userId, $date) {
         $query = "UPDATE Utilisateurs 
                  SET dateSuppression = :date 
@@ -79,9 +76,7 @@ class UserModel {
         }
     }
 
-    // Update user status
     public function updateStatus($userId, $newStatus) {
-        // Verify the status is valid
         if (!in_array($newStatus, ['Actif', 'Inactif'])) {
             throw new \Exception("Invalid status value");
         }
@@ -101,7 +96,6 @@ class UserModel {
         }
     }
 
-    // Get user by ID
     public function getUserById($userId) {
         $query = "SELECT u.*, r.role_id, r.titre as role_titre
                  FROM Utilisateurs u
@@ -132,50 +126,7 @@ class UserModel {
         );
     }
 
-    // Search users
-    public function searchUsers($searchTerm, $roleFilter = null) {
-        $query = "SELECT u.*, r.role_id, r.titre as role_titre
-                 FROM Utilisateurs u
-                 JOIN Role r ON r.role_id = u.role_id
-                 WHERE u.dateSuppression IS NULL
-                 AND (u.prenom LIKE :search 
-                      OR u.nom LIKE :search 
-                      OR u.email LIKE :search)";
 
-        if ($roleFilter) {
-            $query .= " AND r.titre = :role";
-        }
-
-        $stmt = $this->conn->prepare($query);
-        $searchTerm = "%$searchTerm%";
-        $stmt->bindParam(':search', $searchTerm);
-        
-        if ($roleFilter) {
-            $stmt->bindParam(':role', $roleFilter);
-        }
-
-        $stmt->execute();
-
-        $users = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $role = new Role($row['role_id'], $row['role_titre']);
-            $users[] = new Utilisateurs(
-                $row['id'],
-                $row['prenom'],
-                $row['nom'],
-                $row['email'],
-                $row['mot_de_passe'],
-                $role,
-                $row['statut'],
-                $row['dateAjout'],
-                $row['dateSuppression']
-            );
-        }
-
-        return $users;
-    }
-
-    // Check if email exists
     public function emailExists($email, $excludeUserId = null) {
         $query = "SELECT COUNT(*) FROM Utilisateurs 
                  WHERE email = :email 

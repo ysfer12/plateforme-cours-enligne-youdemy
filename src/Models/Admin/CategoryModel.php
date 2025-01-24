@@ -51,7 +51,6 @@ class CategoryModel {
     }
 
     public function deleteCategory($categoryId) {
-        // First check if category has any associated courses
         $checkQuery = "SELECT COUNT(*) FROM Cours WHERE category_id = :category_id";
         $checkStmt = $this->conn->prepare($checkQuery);
         $checkStmt->bindParam(':category_id', $categoryId);
@@ -69,13 +68,11 @@ class CategoryModel {
     }
 
     public function updateCategory($categoryId, $data) {
-        // Validate category existence
         $category = $this->getCategoryById($categoryId);
         if (!$category) {
             throw new \Exception("Catégorie non trouvée");
         }
 
-        // Check if name already exists for another category
         $checkQuery = "SELECT COUNT(*) FROM Category WHERE nom = :nom AND category_id != :category_id";
         $checkStmt = $this->conn->prepare($checkQuery);
         $checkStmt->bindParam(':nom', $data['nom']);
@@ -109,7 +106,6 @@ class CategoryModel {
     }
 
     public function addCategory($data) {
-        // Check if name already exists
         $checkQuery = "SELECT COUNT(*) FROM Category WHERE nom = :nom";
         $checkStmt = $this->conn->prepare($checkQuery);
         $checkStmt->bindParam(':nom', $data['nom']);

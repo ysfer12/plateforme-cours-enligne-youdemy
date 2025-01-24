@@ -1,91 +1,19 @@
 <?php
-session_start();
+require '../../vendor/autoload.php';
+use App\Controllers\Etudiant\Catalogue\CoursController;
+use App\Config\AuthMiddleware;
+AuthMiddleware::checkUserRole('Etudiant');
+$coursController = new \App\Controllers\Etudiant\Catalogue\CoursController();
+$data = $coursController->handleRequest();
 
-// Vérifier si l'utilisateur est connecté
-$userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
-
-// Configuration de la base de données
-$host = "localhost";
-$dbname = "Youdemy";
-$username = "root";
-$password = "";
-
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // Récupérer les paramètres de filtrage
-    $search = isset($_GET['search']) ? trim($_GET['search']) : '';
-    $categoryId = isset($_GET['category']) ? (int)$_GET['category'] : 0;
-    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-    $coursesPerPage = 9;
-    $offset = ($page - 1) * $coursesPerPage;
-
-    // Construire la requête de base
-    $params = [];
-
-    if (!empty($search)) {
-        $params[':search'] = "%$search%";
-    }
-
-    if ($categoryId > 0) {
-        $whereClause .= " AND c.category_id = :category_id";
-        $params[':category_id'] = $categoryId;
-    }
-
-    // Récupérer le total des cours
-    $countQuery = "
-        SELECT COUNT(DISTINCT c.cours_id) as total
-        FROM Cours c
-        LEFT JOIN Cours_Tags ct ON c.cours_id = ct.cours_id
-        LEFT JOIN Tag t ON ct.tag_id = t.tag_id
-      ";
-
-    $stmtCount = $pdo->prepare($countQuery);
-    foreach ($params as $key => $value) {
-        $stmtCount->bindValue($key, $value);
-    }
-    $stmtCount->execute();
-    $totalCourses = $stmtCount->fetch(PDO::FETCH_ASSOC)['total'];
-    $totalPages = ceil($totalCourses / $coursesPerPage);
-
-    // Récupérer les catégories
-    $queryCategories = "SELECT * FROM Category ORDER BY nom";
-    $categories = $pdo->query($queryCategories)->fetchAll(PDO::FETCH_ASSOC);
-
-    // Récupérer les cours
-    $query = "
-        SELECT c.*, cat.nom as category_name,
-               GROUP_CONCAT(DISTINCT t.nom) as tag_names,
-               u.prenom, u.nom as nom_enseignant,
-               COUNT(DISTINCT i.etudiant_id) as nombre_inscrits,
-               CASE WHEN ui.cours_id IS NOT NULL THEN 1 ELSE 0 END as is_inscrit
-        FROM Cours c
-        LEFT JOIN Category cat ON c.category_id = cat.category_id
-        LEFT JOIN Cours_Tags ct ON c.cours_id = ct.cours_id
-        LEFT JOIN Tag t ON ct.tag_id = t.tag_id
-        LEFT JOIN Utilisateurs u ON c.enseignat_id = u.id
-        LEFT JOIN Inscriptions i ON c.cours_id = i.cours_id
-        LEFT JOIN Inscriptions ui ON c.cours_id = ui.cours_id AND ui.etudiant_id = :user_id
-        GROUP BY c.cours_id
-        ORDER BY c.dateAjout DESC
-        LIMIT :offset, :limit";
-
-    $stmt = $pdo->prepare($query);
-    $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
-    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-    $stmt->bindValue(':limit', $coursesPerPage, PDO::PARAM_INT);
-    
-    foreach ($params as $key => $value) {
-        $stmt->bindValue($key, $value);
-    }
-    
-    $stmt->execute();
-    $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-} catch(PDOException $e) {
-    die("Erreur de connexion : " . $e->getMessage());
-}
+// Extract data from the controller response
+$courses = $data['courses'];
+$categories = $data['categories'];
+$search = $data['search'];
+$categoryId = $data['categoryId'];
+$page = $data['page'];
+$totalPages = $data['totalPages'];
+$totalCourses = $data['totalCourses'];
 ?>
 
 <!DOCTYPE html>
@@ -285,8 +213,8 @@ try {
                 <?php endforeach; ?>
             </div>
 
-<!-- Pagination -->
-<?php if ($totalPages > 1): ?>
+            <!-- Pagination -->
+            <?php if ($totalPages > 1): ?>
             <div class="flex justify-center items-center space-x-4 mt-8">
                 <?php
                 $queryParams = $_GET;

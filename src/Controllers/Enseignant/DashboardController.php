@@ -3,6 +3,7 @@ namespace App\Controllers\Enseignant;
 
 use App\Models\Enseignant\UserModel;
 use App\Models\Enseignant\CourseModel;
+
 class DashboardController {
     private $userModel;
     private $courseModel;
@@ -25,7 +26,7 @@ class DashboardController {
             $totalCourses = $this->courseModel->getTotalCourses($userId);
             $totalStudents = $this->courseModel->getTotalStudents($userId);
             $popularCourse = $this->courseModel->getPopularCourse($userId);
-            
+
             return [
                 'utilisateur' => $this->userModel->getUserInfo($userId),
                 'statCours' => $totalCourses,
