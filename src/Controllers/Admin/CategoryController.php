@@ -1,7 +1,6 @@
 <?php
-namespace App\Controllers;
-
-use App\Models\CategoryModel;
+namespace App\Controllers\Admin;
+use App\Models\Admin\CategoryModel;
 
 class CategoryController {
     private $categoryModel;
@@ -12,6 +11,40 @@ class CategoryController {
 
     public function getCategories() {
         return $this->categoryModel->getAllCategories();
+    }
+
+    public function addCategory($data) {
+        if (empty($data['nom'])) {
+            throw new \Exception("Le nom de la catégorie est requis");
+        }
+
+        try {
+            return $this->categoryModel->addCategory([
+                'nom' => $data['nom'],
+                'description' => $data['description'] ?? ''
+            ]);
+        } catch (\Exception $e) {
+            throw new \Exception("Erreur lors de l'ajout de la catégorie: " . $e->getMessage());
+        }
+    }
+
+    public function updateCategory($categoryId, $data) {
+        if (!$categoryId || !is_numeric($categoryId)) {
+            throw new \Exception("ID de catégorie non valide");
+        }
+
+        if (empty($data['nom'])) {
+            throw new \Exception("Le nom de la catégorie est requis");
+        }
+
+        try {
+            return $this->categoryModel->updateCategory($categoryId, [
+                'nom' => $data['nom'],
+                'description' => $data['description'] ?? ''
+            ]);
+        } catch (\Exception $e) {
+            throw new \Exception("Erreur lors de la mise à jour de la catégorie: " . $e->getMessage());
+        }
     }
 
     public function deleteCategory($categoryId) {

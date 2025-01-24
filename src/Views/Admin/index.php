@@ -1,3 +1,10 @@
+<?php   
+require_once '../../../vendor/autoload.php';
+use App\Config\Database;
+USE App\Config\AuthMiddleware;
+AuthMiddleware::checkUserRole('Admin');
+?>
+
 <!DOCTYPE html>
 <html lang="fr" class="scroll-smooth">
 <head>
@@ -94,7 +101,7 @@
                 <!-- Navigation Links - Hidden on Mobile -->
                 <div class="hidden md:flex items-center space-x-8">
                     <div class="hidden md:flex items-center space-x-6">
-                        <a href="../Views/Cours/Cours.php" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
+                        <a href="../Admin/Catalogue/Cours.php" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
                             <i class="fas fa-book-open text-sm"></i>
                             <span>Catalogue</span>
                         </a>
@@ -107,11 +114,8 @@
                         </div>
                     </div>
                     <div class="flex items-center space-x-3">
-                        <a href="../Views/Auth/login.php" class="px-4 py-2 text-blue-600 rounded-lg hover:bg-blue-50 transition">
-                            Connexion
-                        </a>
-                        <a href="../Views/Auth/registre.php" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
-                            Inscription
+                        <a href="../Admin/dashboard.php" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
+                            Administration Tableau de bord
                         </a>
                     </div>
                 </div>
@@ -133,7 +137,7 @@
 
                 <!-- Mobile Navigation Links -->
                 <div class="px-4 pt-2 pb-3 space-y-1">
-                    <a href="../Views/Cours/Cours.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                    <a href="../Catalogue/Cours.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
                         <i class="fas fa-book-open mr-2"></i>
                         Catalogue
                     </a>
@@ -142,11 +146,9 @@
                         Qui sommes nous?
                     </a>
                     <div class="pt-4 flex flex-col space-y-2">
-                        <a href="../Views/Auth/login.php" class="px-4 py-2 text-center text-blue-600 rounded-lg border border-blue-600 hover:bg-blue-50 transition">
-                            Connexion
-                        </a>
-                        <a href="../Views/Auth/registre.php" class="px-4 py-2 text-center bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
-                            Inscription
+
+                        <a href="../Admin/dashboard.php" class="px-4 py-2 text-center bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
+                            Administration Tableau de bord
                         </a>
                     </div>
                 </div>

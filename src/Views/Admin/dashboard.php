@@ -1,206 +1,330 @@
 <?php
 require_once '../../../vendor/autoload.php';
+use App\Controllers\Admin\DashboardController;
+use App\Controllers\Admin\UserController;
 
-// Check admin session/authentication here
-// session_start();
-// if (!isset($_SESSION['admin_id'])) {
-//     header('Location: login.php');
-//     exit();
-// }
+if(isset($_POST['submit'])) {
+    $logout = new UserController();
+    $logout->logout();
+    exit();
+}
 
+// Initialize controller
+$dashboardController = new DashboardController();
+
+// Get statistics
+$studentsCount = $dashboardController->getActiveStudentsCount();
+$teachersCount = $dashboardController->getActiveTeachersCount();
+
+// Get growth percentages
+$growth = $dashboardController->getGrowthPercentages();
+
+// Get recent activities
+$recentActivities = $dashboardController->getRecentActivities();
+
+// Get top courses and teachers
+$topCourses = $dashboardController->getTopCourses();
+$topTeachers = $dashboardController->getTopTeachers();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Youdemy Admin Dashboard</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
+    <title>Dashboard - Youdemy Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        .section { display: none; }
-        .section.active { display: block; }
-        .tab.active {
-            background-color: rgb(55 65 81);
-            border-left: 4px solid rgb(59 130 246);
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
         }
+
         .stat-card:hover {
             transform: translateY(-2px);
             transition: all 0.3s ease;
+        }
+        
+        .sidebar-transition {
+            transition: all 0.3s ease;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Sidebar responsive styles */
+        @media (max-width: 768px) {
+            .sidebar-mini .sidebar-text {
+                display: none;
+            }
+            .sidebar-mini {
+                width: 5rem !important;
+            }
+            .main-content-shifted {
+                margin-left: 5rem !important;
+            }
+            .sidebar-mini .profile-info {
+                display: none;
+            }
+        }
+
+        /* Custom scrollbar for sidebar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1F2937;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4B5563;
+            border-radius: 2px;
         }
     </style>
 </head>
 <body class="bg-gray-50">
     <div class="min-h-screen flex">
-        <!-- Sidebar -->
-        <aside class="fixed w-64 h-full bg-gray-800 text-white shadow-xl z-10">
-            <!-- En-tête Sidebar -->
+        <!-- Responsive Sidebar -->
+        <aside id="sidebar" class="fixed h-full bg-gray-800 text-white shadow-xl z-20 sidebar-transition" style="width: 16rem;">
+            <!-- Sidebar Header -->
             <div class="p-6 border-b border-gray-700">
-                <div class="flex items-center space-x-3">
-                    <i data-lucide="book-open" class="w-8 h-8 text-blue-500"></i>
-                    <h1 class="text-2xl font-bold">Youdemy</h1>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-graduation-cap text-2xl text-blue-500"></i>
+                        <span class="text-2xl font-bold sidebar-text">Youdemy</span>
+                    </div>
+                    <!-- Mobile Toggle -->
+                    <button id="sidebar-toggle" class="md:hidden text-white">
+                        <i class="fas fa-bars"></i>
+                    </button>
                 </div>
-                <p class="text-gray-400 text-sm mt-1">Interface Administrateur</p>
+                <p class="text-gray-400 text-sm mt-1 sidebar-text">Interface Administrateur</p>
             </div>
 
-            <!-- Profil Admin -->
-            <div class="p-4">
-                <div class="flex items-center space-x-3 bg-gray-700/50 rounded-lg p-3 mb-4">
-                    <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
-                        <i data-lucide="user" class="w-6 h-6"></i>
-                    </div>
-                    <div>
-                        <p class="font-medium"><?php echo htmlspecialchars($_SESSION['admin_name'] ?? 'Admin'); ?></p>
-                        <p class="text-sm text-gray-400">Super Admin</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Navigation -->
-            <nav class="mt-2">
-                <a href="dashboard.php" class="tab w-full flex items-center p-4 hover:bg-gray-700 transition-colors active">
-                    <i data-lucide="bar-chart-2" class="mr-3 w-5 h-5"></i>
-                    <span>Statistiques</span>
+            <!-- Navigation Menu -->
+            <nav class="mt-6 custom-scrollbar" style="height: calc(100% - 200px); overflow-y: auto;">
+                <a href="dashboard.php" class="flex items-center px-6 py-3 bg-gray-700 text-white">
+                    <i class="fas fa-th-large w-5 h-5"></i>
+                    <span class="ml-3 sidebar-text">Dashboard</span>
                 </a>
-                <a href="Utilisateurs.php" class="tab w-full flex items-center p-4 hover:bg-gray-700 transition-colors">
-                    <i data-lucide="users" class="mr-3 w-5 h-5"></i>
-                    <span>Utilisateurs</span>
+                <a href="Utilisateurs.php" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700">
+                    <i class="fas fa-users w-5 h-5"></i>
+                    <span class="ml-3 sidebar-text">Utilisateurs</span>
                 </a>
-                <a href="Tags.php" class="tab w-full flex items-center p-4 hover:bg-gray-700 transition-colors">
-                    <i data-lucide="tag" class="mr-3 w-5 h-5"></i>
-                    <span>Tags</span>
+                <a href="Tags.php" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700">
+                    <i class="fas fa-tags w-5 h-5"></i>
+                    <span class="ml-3 sidebar-text">Tags</span>
                 </a>
-                <a href="Categories.php" class="tab w-full flex items-center p-4 hover:bg-gray-700 transition-colors">
-                    <i data-lucide="folder-tree" class="mr-3 w-5 h-5"></i>
-                    <span>Catégories</span>
+                <a href="Categories.php" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700">
+                    <i class="fas fa-folder w-5 h-5"></i>
+                    <span class="ml-3 sidebar-text">Catégories</span>
                 </a>
             </nav>
 
-            <!-- Bouton Déconnexion -->
+            <!-- Logout Button -->
             <div class="absolute bottom-0 w-full p-4 border-t border-gray-700">
-                <a href="logout.php" class="w-full flex items-center justify-center space-x-2 text-gray-400 hover:text-white transition-colors">
-                    <i data-lucide="log-out" class="w-5 h-5"></i>
-                    <span>Déconnexion</span>
-                </a>
+                <form action="" method="POST" class="flex items-center text-gray-300 hover:text-white">
+                    <button type="submit" name="submit" class="flex items-center w-full">
+                        <i class="fas fa-sign-out-alt w-5 h-5"></i>
+                        <span class="ml-3 sidebar-text">Déconnexion</span>
+                    </button>
+                </form>
             </div>
         </aside>
 
-        <!-- Main Content -->
-        <main class="ml-64 flex-1 p-8">
-            <!-- Statistics Dashboard -->
+        <!-- Main Content Area -->
+        <main id="main-content" class="flex-1 p-8 transition-all duration-300" style="margin-left: 16rem;">
+            <!-- Header -->
             <div class="flex justify-between items-center mb-8">
                 <div>
-                    <h2 class="text-3xl font-bold text-gray-800">Tableau de bord</h2>
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Tableau de bord</h2>
                     <p class="text-gray-600 mt-1">Vue d'ensemble des statistiques</p>
-                </div>
-                <div class="flex space-x-3">
-                    <button class="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow hover:shadow-md transition-all">
-                        <i data-lucide="download" class="w-5 h-5 text-gray-600"></i>
-                        <span>Exporter</span>
-                    </button>
                 </div>
             </div>
 
-            <!-- Statistics Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Statistics Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <!-- Students Card -->
                 <div class="stat-card bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all">
                     <div class="flex items-center justify-between">
                         <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                            <i data-lucide="graduation-cap" class="w-6 h-6 text-blue-500"></i>
+                            <i class="fas fa-user-graduate text-xl text-blue-500"></i>
                         </div>
-                        <span class="text-sm font-medium text-green-500 bg-green-100 px-2 py-1 rounded">+12%</span>
+                        <span class="text-sm font-medium <?php echo $dashboardController->getGrowthClass($growth['students']); ?> px-2 py-1 rounded">
+                            <?php echo ($growth['students'] >= 0 ? '+' : '') . $growth['students']; ?>%
+                        </span>
                     </div>
-                    <h3 class="text-2xl font-bold mt-4">1,250</h3>
+                    <h3 class="text-2xl font-bold mt-4"><?php echo number_format($studentsCount); ?></h3>
                     <p class="text-gray-600">Étudiants actifs</p>
-                    <div class="mt-4 flex items-center text-sm text-gray-500">
-                        <i data-lucide="trending-up" class="w-4 h-4 mr-1 text-green-500"></i>
-                        <span>+8% ce mois</span>
-                    </div>
                 </div>
 
                 <!-- Teachers Card -->
                 <div class="stat-card bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all">
                     <div class="flex items-center justify-between">
                         <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                            <i data-lucide="users" class="w-6 h-6 text-purple-500"></i>
+                            <i class="fas fa-chalkboard-teacher text-xl text-purple-500"></i>
                         </div>
-                        <span class="text-sm font-medium text-green-500 bg-green-100 px-2 py-1 rounded">+5%</span>
+                        <span class="text-sm font-medium <?php echo $dashboardController->getGrowthClass($growth['teachers']); ?> px-2 py-1 rounded">
+                            <?php echo ($growth['teachers'] >= 0 ? '+' : '') . $growth['teachers']; ?>%
+                        </span>
                     </div>
-                    <h3 class="text-2xl font-bold mt-4">48</h3>
+                    <h3 class="text-2xl font-bold mt-4"><?php echo number_format($teachersCount); ?></h3>
                     <p class="text-gray-600">Enseignants</p>
-                    <div class="mt-4 flex items-center text-sm text-gray-500">
-                        <i data-lucide="trending-up" class="w-4 h-4 mr-1 text-green-500"></i>
-                        <span>+3% ce mois</span>
-                    </div>
-                </div>
-
-                <!-- Courses Card -->
-                <div class="stat-card bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all">
-                    <div class="flex items-center justify-between">
-                        <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-                            <i data-lucide="book-open" class="w-6 h-6 text-yellow-500"></i>
-                        </div>
-                        <span class="text-sm font-medium text-green-500 bg-green-100 px-2 py-1 rounded">+15%</span>
-                    </div>
-                    <h3 class="text-2xl font-bold mt-4">156</h3>
-                    <p class="text-gray-600">Cours publiés</p>
-                    <div class="mt-4 flex items-center text-sm text-gray-500">
-                        <i data-lucide="trending-up" class="w-4 h-4 mr-1 text-green-500"></i>
-                        <span>+12% ce mois</span>
-                    </div>
-                </div>
-
-                <!-- Revenue Card -->
-                <div class="stat-card bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all">
-                    <div class="flex items-center justify-between">
-                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                            <i data-lucide="euro" class="w-6 h-6 text-green-500"></i>
-                        </div>
-                        <span class="text-sm font-medium text-green-500 bg-green-100 px-2 py-1 rounded">+20%</span>
-                    </div>
-                    <h3 class="text-2xl font-bold mt-4">45,000€</h3>
-                    <p class="text-gray-600">Revenu mensuel</p>
-                    <div class="mt-4 flex items-center text-sm text-gray-500">
-                        <i data-lucide="trending-up" class="w-4 h-4 mr-1 text-green-500"></i>
-                        <span>+18% ce mois</span>
-                    </div>
                 </div>
             </div>
 
-            <!-- Recent Activity -->
+            <!-- Top Courses Section -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                <h3 class="text-lg font-bold mb-4">Top 3 Cours</h3>
+                <div class="space-y-4">
+                    <?php foreach ($topCourses as $course): ?>
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center bg-green-100">
+                                <i class="fas fa-book text-green-500"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-medium">
+                                    <?php echo htmlspecialchars($course['titre']); ?>
+                                </p>
+                                <p class="text-sm text-gray-500">
+                                    <?php echo $course['Inscriptions']; ?> inscriptions
+                                </p>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <!-- Top Teachers Section -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                <h3 class="text-lg font-bold mb-4">Top 3 Enseignants</h3>
+                <div class="space-y-4">
+                    <?php foreach ($topTeachers as $teacher): ?>
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center bg-yellow-100">
+                                <i class="fas fa-chalkboard-teacher text-yellow-500"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-medium">
+                                    <?php echo htmlspecialchars("{$teacher['prenom']} {$teacher['nom']}"); ?>
+                                </p>
+                                <p class="text-sm text-gray-500">
+                                    <?php echo $teacher['courses']; ?> cours
+                                </p>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <!-- Recent Activity Section -->
             <div class="bg-white rounded-xl shadow-sm p-6">
                 <h3 class="text-lg font-bold mb-4">Activité récente</h3>
                 <div class="space-y-4">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                            <i data-lucide="user-plus" class="w-5 h-5 text-blue-500"></i>
+                    <?php foreach ($recentActivities as $activity): ?>
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center 
+                                <?php echo $activity['type'] === 'inscription' ? 'bg-blue-100' : 'bg-purple-100'; ?>">
+                                <i class="fas fa-user-plus text-<?php echo $activity['type'] === 'inscription' ? 'blue' : 'purple'; ?>-500"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-medium">
+                                    <?php echo htmlspecialchars("{$activity['prenom']} {$activity['nom']}"); ?> 
+                                    s'est inscrit(e) en tant que <?php echo strtolower(htmlspecialchars($activity['role'])); ?>
+                                </p>
+                                <p class="text-sm text-gray-500">
+                                    <?php echo $dashboardController->formatTimeAgo($activity['date']); ?>
+                                </p>
+                            </div>
                         </div>
-                        <div class="flex-1">
-                            <p class="font-medium">Nouvel étudiant inscrit</p>
-                            <p class="text-sm text-gray-500">Marie Dubois s'est inscrite au cours de JavaScript</p>
-                        </div>
-                        <span class="text-sm text-gray-500">Il y a 2h</span>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                            <i data-lucide="book" class="w-5 h-5 text-green-500"></i>
-                        </div>
-                        <div class="flex-1">
-                            <p class="font-medium">Nouveau cours publié</p>
-                            <p class="text-sm text-gray-500">React.js Avancé par Pierre Martin</p>
-                        </div>
-                        <span class="text-sm text-gray-500">Il y a 4h</span>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </main>
     </div>
 
     <script>
-        // Initialize Lucide icons
-        document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            let isSidebarExpanded = true;
+
+            // Function to handle sidebar state
+            function updateSidebarState() {
+                const isMobile = window.innerWidth <= 768;
+                
+                if (isMobile && isSidebarExpanded) {
+                    // Collapse sidebar on mobile
+                    sidebar.style.width = '5rem';
+                    mainContent.style.marginLeft = '5rem';
+                    sidebar.classList.add('sidebar-mini');
+                    isSidebarExpanded = false;
+                } else if (!isMobile && !isSidebarExpanded) {
+                    // Expand sidebar on desktop
+                    sidebar.style.width = '16rem';
+                    mainContent.style.marginLeft = '16rem';
+                    sidebar.classList.remove('sidebar-mini');
+                    isSidebarExpanded = true;
+                }
+            }
+
+            // Toggle sidebar on mobile
+            sidebarToggle.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    isSidebarExpanded = !isSidebarExpanded;
+                    if (!isSidebarExpanded) {
+                        sidebar.style.width = '5rem';
+                        mainContent.style.marginLeft = '5rem';
+                        sidebar.classList.add('sidebar-mini');
+                    } else {
+                        sidebar.style.width = '16rem';
+                        mainContent.style.marginLeft = '16rem';
+                        sidebar.classList.remove('sidebar-mini');
+                    }
+                }
+            });
+
+            // Handle window resize
+            let resizeTimeout;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(updateSidebarState, 100);
+            });
+
+            // Initial setup
+            updateSidebarState();
+
+            // Add hover effects for stat cards
+            const statCards = document.querySelectorAll('.stat-card');
+            statCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', function(e) {
+                if (window.innerWidth <= 768 && isSidebarExpanded) {
+                    if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                        isSidebarExpanded = false;
+                        sidebar.style.width = '5rem';
+                        mainContent.style.marginLeft = '5rem';
+                        sidebar.classList.add('sidebar-mini');
+                    }
+                }
+            });
         });
     </script>
 </body>

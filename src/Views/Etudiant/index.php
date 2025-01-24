@@ -1,3 +1,10 @@
+<?php
+require_once '../../../vendor/autoload.php';
+use App\Config\AuthMiddleware;
+
+// Check if the user is logged in and has the role 'Etudiant'
+AuthMiddleware::checkUserRole('Etudiant');
+?>
 <!DOCTYPE html>
 <html lang="fr" class="scroll-smooth">
 <head>
@@ -94,7 +101,7 @@
                 <!-- Navigation Links - Hidden on Mobile -->
                 <div class="hidden md:flex items-center space-x-8">
                     <div class="hidden md:flex items-center space-x-6">
-                        <a href="../Views/Cours/Cours.php" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
+                        <a href="../Etudiant/Catalogue/Cours.php" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
                             <i class="fas fa-book-open text-sm"></i>
                             <span>Catalogue</span>
                         </a>
@@ -107,11 +114,8 @@
                         </div>
                     </div>
                     <div class="flex items-center space-x-3">
-                        <a href="../Views/Auth/login.php" class="px-4 py-2 text-blue-600 rounded-lg hover:bg-blue-50 transition">
-                            Connexion
-                        </a>
-                        <a href="../Views/Auth/registre.php" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
-                            Inscription
+                    <a href="../Etudiant/home.php" class="px-4 py-2 text-center bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
+                            Mes Cours
                         </a>
                     </div>
                 </div>
@@ -142,11 +146,8 @@
                         Qui sommes nous?
                     </a>
                     <div class="pt-4 flex flex-col space-y-2">
-                        <a href="../Views/Auth/login.php" class="px-4 py-2 text-center text-blue-600 rounded-lg border border-blue-600 hover:bg-blue-50 transition">
-                            Connexion
-                        </a>
-                        <a href="../Views/Auth/registre.php" class="px-4 py-2 text-center bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
-                            Inscription
+                        <a href="../Etudiant/home.php" class="px-4 py-2 text-center bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
+                            Mes Cours
                         </a>
                     </div>
                 </div>
@@ -201,7 +202,7 @@
                 </div>
                 <!-- Enhanced Hero Image -->
                 <div class="hidden md:block relative z-10">
-                    <img src="../../public/assets/depositphotos_109883396-stock-photo-student-in-school-library-using.jpg" alt="Learning Illustration" class="rounded-2xl shadow-2xl transform hover:scale-105 transition duration-500">
+                    <img src="../../../public/assets/depositphotos_109883396-stock-photo-student-in-school-library-using.jpg" alt="Learning Illustration" class="rounded-2xl shadow-2xl transform hover:scale-105 transition duration-500">
                     <!-- Floating Elements -->
                     <div class="absolute -top-4 -right-4 bg-white rounded-lg shadow-lg p-4 animate-float">
                         <div class="flex items-center space-x-2">
