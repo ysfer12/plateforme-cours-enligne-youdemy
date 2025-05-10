@@ -1,7 +1,7 @@
 <?php
-namespace App\Controllers;
+namespace App\Controllers\Admin;
 
-use App\Models\TagsModel;
+use App\Models\Admin\TagsModel;
 use App\Classes\Tags;
 
 class TagsController {
