@@ -1,10 +1,10 @@
 <?php
-namespace App\Controllers;
+namespace App\Models\Admin;
 
 use App\Config\Database;
 use PDO;
 
-class DashboardController {
+class DashboardModel {
     private $conn;
 
     public function __construct() {
@@ -29,26 +29,15 @@ class DashboardController {
     }
 
     public function getPublishedCoursesCount() {
-        $query = "SELECT COUNT(*) as count FROM Cours WHERE statut = 'Publié'";
+        $query = "SELECT COUNT(*) as count FROM Cours WHERE status = 'Publié'";
         $stmt = $this->conn->query($query);
         return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
-    }
-
-    public function getMonthlyRevenue() {
-        $query = "SELECT COALESCE(SUM(montant), 0) as total 
-                 FROM Paiements 
-                 WHERE MONTH(date_paiement) = MONTH(CURRENT_DATE()) 
-                 AND YEAR(date_paiement) = YEAR(CURRENT_DATE())";
-        $stmt = $this->conn->query($query);
-        return $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     }
 
     public function getGrowthPercentages() {
         return [
             'students' => $this->calculateGrowthPercentage('Etudiant'),
             'teachers' => $this->calculateGrowthPercentage('Enseignant'),
-            'courses' => $this->calculateCourseGrowthPercentage(),
-            'revenue' => $this->calculateRevenueGrowthPercentage()
         ];
     }
 
@@ -73,38 +62,6 @@ class DashboardController {
         return round((($result['current_month'] - $result['last_month']) / $result['last_month']) * 100, 1);
     }
 
-    private function calculateCourseGrowthPercentage() {
-        $query = "SELECT 
-            (SELECT COUNT(*) FROM Cours 
-             WHERE MONTH(date_creation) = MONTH(CURRENT_DATE())
-             AND YEAR(date_creation) = YEAR(CURRENT_DATE())) as current_month,
-            (SELECT COUNT(*) FROM Cours 
-             WHERE MONTH(date_creation) = MONTH(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH))
-             AND YEAR(date_creation) = YEAR(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH))) as last_month";
-        
-        $stmt = $this->conn->query($query);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($result['last_month'] == 0) return 0;
-        return round((($result['current_month'] - $result['last_month']) / $result['last_month']) * 100, 1);
-    }
-
-    private function calculateRevenueGrowthPercentage() {
-        $query = "SELECT 
-            (SELECT COALESCE(SUM(montant), 0) FROM Paiements 
-             WHERE MONTH(date_paiement) = MONTH(CURRENT_DATE())
-             AND YEAR(date_paiement) = YEAR(CURRENT_DATE())) as current_month,
-            (SELECT COALESCE(SUM(montant), 0) FROM Paiements 
-             WHERE MONTH(date_paiement) = MONTH(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH))
-             AND YEAR(date_paiement) = YEAR(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH))) as last_month";
-        
-        $stmt = $this->conn->query($query);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($result['last_month'] == 0) return 0;
-        return round((($result['current_month'] - $result['last_month']) / $result['last_month']) * 100, 1);
-    }
-
     public function getRecentActivities($limit = 5) {
         $query = "SELECT 'inscription' as type, 
                         u.prenom, u.nom, 
@@ -117,11 +74,11 @@ class DashboardController {
                  SELECT 'cours' as type,
                         c.titre as prenom,
                         e.prenom as nom,
-                        c.date_creation as date,
+                        c.dateAjout as date,
                         'cours' as role
                  FROM Cours c
-                 JOIN Utilisateurs e ON e.id = c.enseignant_id
-                 WHERE c.date_creation >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY)
+                 JOIN Utilisateurs e ON e.id = c.enseignat_id
+                 WHERE c.dateAjout >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY)
                  ORDER BY date DESC
                  LIMIT :limit";
         
@@ -129,6 +86,56 @@ class DashboardController {
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
         
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getGrowthClass($percentage) {
+        return $percentage >= 0 ? 'text-green-500 bg-green-100' : 'text-red-500 bg-red-100';
+    }
+
+    public function formatTimeAgo($datetime) {
+        $timestamp = strtotime($datetime);
+        $now = time();
+        $diff = $now - $timestamp;
+
+        if ($diff < 60) {
+            return "Il y a quelques secondes";
+        } elseif ($diff < 3600) {
+            $minutes = floor($diff / 60);
+            return "Il y a " . $minutes . " minute" . ($minutes > 1 ? 's' : '');
+        } elseif ($diff < 86400) {
+            $hours = floor($diff / 3600);
+            return "Il y a " . $hours . " heure" . ($hours > 1 ? 's' : '');
+        } else {
+            $days = floor($diff / 86400);
+            return "Il y a " . $days . " jour" . ($days > 1 ? 's' : '');
+        }
+    }
+
+    public function getTopCourses($limit = 3) {
+        $query = "SELECT c.titre, COUNT(i.id) as Inscriptions
+                  FROM Cours c
+                  JOIN Inscriptions i ON i.cours_id = c.cours_id
+                  GROUP BY c.cours_id
+                  ORDER BY Inscriptions DESC
+                  LIMIT :limit";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getTopTeachers($limit = 3) {
+        $query = "SELECT u.prenom, u.nom, COUNT(c.cours_id) as courses
+                  FROM Utilisateurs u
+                  JOIN Cours c ON c.enseignat_id = u.id
+                  WHERE u.role_id = (SELECT role_id FROM Role WHERE titre = 'Enseignant')
+                  GROUP BY u.id
+                  ORDER BY courses DESC
+                  LIMIT :limit";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

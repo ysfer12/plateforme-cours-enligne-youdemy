@@ -1,6 +1,5 @@
 <?php
-namespace App\Models;
-
+namespace App\Models\Admin;
 use App\Classes\Category;
 use App\Config\Database;
 use PDO;
@@ -52,7 +51,6 @@ class CategoryModel {
     }
 
     public function deleteCategory($categoryId) {
-        // First check if category has any associated courses
         $checkQuery = "SELECT COUNT(*) FROM Cours WHERE category_id = :category_id";
         $checkStmt = $this->conn->prepare($checkQuery);
         $checkStmt->bindParam(':category_id', $categoryId);
@@ -69,17 +67,71 @@ class CategoryModel {
         return $stmt->execute();
     }
 
-    public function updateCategory($categoryId, $nom, $description) {
+    public function updateCategory($categoryId, $data) {
+        $category = $this->getCategoryById($categoryId);
+        if (!$category) {
+            throw new \Exception("Catégorie non trouvée");
+        }
+
+        $checkQuery = "SELECT COUNT(*) FROM Category WHERE nom = :nom AND category_id != :category_id";
+        $checkStmt = $this->conn->prepare($checkQuery);
+        $checkStmt->bindParam(':nom', $data['nom']);
+        $checkStmt->bindParam(':category_id', $categoryId);
+        $checkStmt->execute();
+
+        if ($checkStmt->fetchColumn() > 0) {
+            throw new \Exception("Une catégorie avec ce nom existe déjà");
+        }
+
         $query = "UPDATE Category 
                  SET nom = :nom, description = :description 
                  WHERE category_id = :category_id";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':category_id', $categoryId);
-        $stmt->bindParam(':nom', $nom);
-        $stmt->bindParam(':description', $description);
+        try {
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':category_id', $categoryId);
+            $stmt->bindParam(':nom', $data['nom']);
+            $stmt->bindParam(':description', $data['description']);
+            
+            $result = $stmt->execute();
+            
+            if (!$result) {
+                throw new \Exception("Erreur lors de la mise à jour de la catégorie");
+            }
+            
+            return true;
+        } catch (\PDOException $e) {
+            throw new \Exception("Erreur de base de données: " . $e->getMessage());
+        }
+    }
 
-        return $stmt->execute();
+    public function addCategory($data) {
+        $checkQuery = "SELECT COUNT(*) FROM Category WHERE nom = :nom";
+        $checkStmt = $this->conn->prepare($checkQuery);
+        $checkStmt->bindParam(':nom', $data['nom']);
+        $checkStmt->execute();
+
+        if ($checkStmt->fetchColumn() > 0) {
+            throw new \Exception("Une catégorie avec ce nom existe déjà");
+        }
+
+        $query = "INSERT INTO Category (nom, description) VALUES (:nom, :description)";
+
+        try {
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':nom', $data['nom']);
+            $stmt->bindParam(':description', $data['description']);
+            
+            $result = $stmt->execute();
+            
+            if (!$result) {
+                throw new \Exception("Erreur lors de l'ajout de la catégorie");
+            }
+            
+            return $this->conn->lastInsertId();
+        } catch (\PDOException $e) {
+            throw new \Exception("Erreur de base de données: " . $e->getMessage());
+        }
     }
 
     public function getCourseCount($categoryId) {

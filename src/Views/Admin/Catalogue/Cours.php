@@ -1,6 +1,6 @@
 <?php
 // Database and Controller initialization
-require_once '../../../vendor/autoload.php';
+require_once '../../../../vendor/autoload.php';
 
 use App\Config\Database;
 use App\Controllers\Catalogue\CoursController;
@@ -26,28 +26,42 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Découvrez nos Formations - LearnHub</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
+
+        main {
+            flex-grow: 1;
         }
-        .content-overlay {
-            background: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            backdrop-filter: blur(8px);
-        }
-        .card-hover {
-            transition: all 0.3s ease;
-        }
-        .card-hover:hover {
-            transform: translateY(-4px);
-        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    body {
+        font-family: 'Inter', sans-serif;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+    
+    .glass-effect {
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.9);
+    }
+    
+    .gradient-text {
+        background: linear-gradient(to right, #3B82F6, #2563EB);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
     </style>
 </head>
 <body class="bg-gray-50 font-inter">
@@ -88,7 +102,7 @@ try {
                 <!-- Navigation Links - Hidden on Mobile -->
                 <div class="hidden md:flex items-center space-x-8">
                     <div class="hidden md:flex items-center space-x-6">
-                        <a href="../Views/Cours/Cours.php" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
+                        <a href="../Admin/Cours.php" class="text-gray-600 hover:text-blue-600 transition flex items-center space-x-1">
                             <i class="fas fa-book-open text-sm"></i>
                             <span>Catalogue</span>
                         </a>
@@ -101,11 +115,8 @@ try {
                         </div>
                     </div>
                     <div class="flex items-center space-x-3">
-                        <a href="../Views/Auth/login.php" class="px-4 py-2 text-blue-600 rounded-lg hover:bg-blue-50 transition">
-                            Connexion
-                        </a>
-                        <a href="../Views/Auth/registre.php" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
-                            Inscription
+                        <a href="../Admin/dashboard.php" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
+                            Administration Tableau de bord
                         </a>
                     </div>
                 </div>
@@ -127,22 +138,25 @@ try {
 
                 <!-- Mobile Navigation Links -->
                 <div class="px-4 pt-2 pb-3 space-y-1">
+                    <a href="../Admin/Cours.php" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                        <i class="fas fa-book-open mr-2"></i>
+                        Catalogue
+                    </a>
                     <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50">
                         <i class="fas fa-th-large mr-2"></i>
                         Qui sommes nous?
                     </a>
                     <div class="pt-4 flex flex-col space-y-2">
-                        <a href="../Views/Auth/login.php" class="px-4 py-2 text-center text-blue-600 rounded-lg border border-blue-600 hover:bg-blue-50 transition">
-                            Connexion
-                        </a>
-                        <a href="../Views/Auth/registre.php" class="px-4 py-2 text-center bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
-                            Inscription
+
+                        <a href="../Admin/dashboard.php" class="px-4 py-2 text-center bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition">
+                            Administration Tableau de bord
                         </a>
                     </div>
                 </div>
             </div>
         </div>
-    </nav>  
+    </nav>   
+
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-8">
         <!-- Hero Section -->
@@ -323,39 +337,39 @@ try {
 
     <script>
         feather.replace();
-        // Mobile menu toggle
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
+    // Mobile menu toggle
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
 
-        mobileMenuButton.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent event from bubbling up
-            mobileMenu.classList.toggle('hidden');
-            
-            // Update the icon
+    mobileMenuButton.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent event from bubbling up
+        mobileMenu.classList.toggle('hidden');
+        
+        // Update the icon
+        const icon = mobileMenuButton.querySelector('i');
+        if (mobileMenu.classList.contains('hidden')) {
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+        } else {
+            icon.classList.remove('fa-bars');
+            icon.classList.add('fa-times');
+        }
+    });
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!mobileMenu.contains(e.target) && !mobileMenuButton.contains(e.target)) {
+            mobileMenu.classList.add('hidden');
             const icon = mobileMenuButton.querySelector('i');
-            if (mobileMenu.classList.contains('hidden')) {
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            } else {
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-times');
-            }
-        });
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+        }
+    });
 
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!mobileMenu.contains(e.target) && !mobileMenuButton.contains(e.target)) {
-                mobileMenu.classList.add('hidden');
-                const icon = mobileMenuButton.querySelector('i');
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            }
-        });
-
-        // Prevent menu from closing when clicking inside it
-        mobileMenu.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
+    // Prevent menu from closing when clicking inside it
+    mobileMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
 
 
     </script>

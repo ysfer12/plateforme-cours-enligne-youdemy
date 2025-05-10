@@ -1,371 +1,251 @@
+<?php
+require_once '../../../vendor/autoload.php';
+use App\Config\Database;
+use App\Controllers\Etudiant\EtudiantController;
+use App\Controllers\Auth\AuthController;
+use App\Config\AuthMiddleware;
+AuthMiddleware::checkUserRole('Etudiant');
+
+if(isset($_POST['submit'])) {
+$logout = new AuthController();
+$logout->logout();
+}
+
+try {
+    $database = new Database();
+    $db = $database->connection();
+    
+    $etudiantController = new EtudiantController($db);
+    $dashboardData = $etudiantController->getDashboardData($_SESSION['user_id']);
+
+    $user = $dashboardData['user'];
+    $courses = $dashboardData['courses'];
+    $statistics = $dashboardData['statistics'];
+    $error = $dashboardData['error'];
+
+    $totalCourses = $statistics['totalCourses'] ?? 0;//opérateur de fusion null 
+    $totalCategories = $statistics['totalCategories'] ?? 0;//opérateur de fusion null  
+    $lastInscription = $statistics['lastInscription'] ?? 'Aucune';//opérateur de fusion null 
+
+} catch(Exception $e) {
+    $error = "Une erreur est survenue : " . $e->getMessage();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CareerLink - Espace Recruteur</title>
+    <title>Dashboard Étudiant - Youdemy</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-gray-50">
-    <!-- Sidebar -->
-    <aside class="fixed top-0 left-0 h-screen w-64 bg-gray-800 text-white p-4">
-        <div class="flex items-center mb-8">
-            <i class="fas fa-briefcase text-2xl mr-2"></i>
-            <span class="text-xl font-bold">CareerLink</span>
-        </div>
-
-        <div class="mb-8 p-3 bg-gray-700 rounded-lg">
-            <div class="flex items-center space-x-3">
-                <img src="https://via.placeholder.com/40" alt="Company Logo" class="rounded-full">
-                <div>
-                    <p class="font-semibold">TechCorp</p>
-                    <p class="text-sm text-gray-300">Recruteur</p>
-                </div>
-            </div>
-        </div>
-
-        <nav class="space-y-2">
-            <a href="#" class="flex items-center space-x-2 bg-blue-600 text-white p-3 rounded-lg">
-                <i class="fas fa-chart-line"></i>
-                <span>Tableau de bord</span>
-            </a>
-            <a href="#" class="flex items-center space-x-2 hover:bg-gray-700 p-3 rounded-lg transition">
-                <i class="fas fa-briefcase"></i>
-                <span>Mes offres</span>
-            </a>
-            <a href="#" class="flex items-center space-x-2 hover:bg-gray-700 p-3 rounded-lg transition">
-                <i class="fas fa-users"></i>
-                <span>Candidatures</span>
-            </a>
-            <a href="#" class="flex items-center space-x-2 hover:bg-gray-700 p-3 rounded-lg transition">
-                <i class="fas fa-envelope"></i>
-                <span>Messages</span>
-            </a>
-            <a href="#" class="flex items-center space-x-2 hover:bg-gray-700 p-3 rounded-lg transition">
-                <i class="fas fa-building"></i>
-                <span>Profil entreprise</span>
-            </a>
-            <a href="#" class="flex items-center space-x-2 hover:bg-gray-700 p-3 rounded-lg transition">
-                <i class="fas fa-cog"></i>
-                <span>Paramètres</span>
-            </a>
-        </nav>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="ml-64 p-8">
-        <!-- Top Bar -->
-        <div class="flex justify-between items-center mb-8">
-            <div>
-                <h1 class="text-2xl font-bold mb-1">Bonjour, TechCorp</h1>
-                <p class="text-gray-600">Voici un aperçu de vos activités de recrutement</p>
-            </div>
-            <div class="flex items-center space-x-4">
-                <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center">
-                    <i class="fas fa-plus mr-2"></i> Publier une offre
-                </button>
-                <div class="relative">
-                    <i class="fas fa-bell text-gray-500 text-xl cursor-pointer"></i>
-                    <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">5</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-gray-500">Offres actives</h3>
-                    <i class="fas fa-briefcase text-blue-500 text-2xl"></i>
-                </div>
-                <p class="text-3xl font-bold">12</p>
-                <div class="mt-2 flex items-center text-sm text-green-500">
-                    <i class="fas fa-arrow-up mr-1"></i>
-                    <span>+2 ce mois</span>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-gray-500">Candidatures reçues</h3>
-                    <i class="fas fa-file-alt text-blue-500 text-2xl"></i>
-                </div>
-                <p class="text-3xl font-bold">48</p>
-                <div class="mt-2 flex items-center text-sm text-green-500">
-                    <i class="fas fa-arrow-up mr-1"></i>
-                    <span>+15 cette semaine</span>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-gray-500">Entretiens programmés</h3>
-                    <i class="fas fa-calendar-alt text-blue-500 text-2xl"></i>
-                </div>
-                <p class="text-3xl font-bold">8</p>
-                <div class="mt-2 flex items-center text-sm text-blue-500">
-                    <i class="fas fa-clock mr-1"></i>
-                    <span>3 cette semaine</span>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-gray-500">Messages non lus</h3>
-                    <i class="fas fa-envelope text-blue-500 text-2xl"></i>
-                </div>
-                <p class="text-3xl font-bold">15</p>
-                <div class="mt-2 flex items-center text-sm text-yellow-500">
-                    <i class="fas fa-exclamation-circle mr-1"></i>
-                    <span>À traiter</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Applications & Active Jobs -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <!-- Recent Applications -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-semibold">Dernières candidatures</h3>
-                    <a href="#" class="text-blue-500 hover:text-blue-600">Voir tout</a>
-                </div>
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between p-4 border rounded-lg">
-                        <div class="flex items-center space-x-4">
-                            <img src="https://via.placeholder.com/40" alt="Candidate" class="rounded-full">
-                            <div>
-                                <p class="font-semibold">Julie Dupont</p>
-                                <p class="text-sm text-gray-500">Développeur Frontend</p>
-                            </div>
-                        </div>
-                        <div class="flex space-x-2">
-                            <button class="text-green-500 hover:text-green-600"><i class="fas fa-check"></i></button>
-                            <button class="text-red-500 hover:text-red-600"><i class="fas fa-times"></i></button>
-                            <button class="text-blue-500 hover:text-blue-600"><i class="fas fa-eye"></i></button>
-                        </div>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Logo et navigation -->
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="index.php" class="text-xl font-bold text-blue-600">Youdemy</a>
                     </div>
-
-                    <div class="flex items-center justify-between p-4 border rounded-lg">
-                        <div class="flex items-center space-x-4">
-                            <img src="https://via.placeholder.com/40" alt="Candidate" class="rounded-full">
-                            <div>
-                                <p class="font-semibold">Marc Martin</p>
-                                <p class="text-sm text-gray-500">UX Designer</p>
-                            </div>
-                        </div>
-                        <div class="flex space-x-2">
-                            <button class="text-green-500 hover:text-green-600"><i class="fas fa-check"></i></button>
-                            <button class="text-red-500 hover:text-red-600"><i class="fas fa-times"></i></button>
-                            <button class="text-blue-500 hover:text-blue-600"><i class="fas fa-eye"></i></button>
-                        </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="dashboard.php" class="border-b-2 border-blue-600 text-gray-900 inline-flex items-center px-1 pt-1 text-sm font-medium">
+                            Dashboard
+                        </a>
                     </div>
                 </div>
-            </div>
 
-            <!-- Active Jobs -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-semibold">Offres actives</h3>
-                    <a href="#" class="text-blue-500 hover:text-blue-600">Gérer les offres</a>
-                </div>
-                <div class="space-y-4">
-                    <div class="border rounded-lg p-4">
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-semibold">Développeur Full Stack</h4>
-                            <span class="px-2 py-1 bg-green-100 text-green-600 rounded-full text-sm">Active</span>
-                        </div>
-                        <p class="text-gray-500 text-sm mb-2">Paris - CDI</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-500">15 candidatures</span>
-                            <div class="flex space-x-2">
-                                <button class="text-blue-500 hover:text-blue-600"><i class="fas fa-edit"></i></button>
-                                <button class="text-red-500 hover:text-red-600"><i class="fas fa-trash"></i></button>
+                <!-- Menu utilisateur -->
+                <div class="flex items-center">
+                    <!-- Notifications -->
+                    <button class="p-2 text-gray-400 hover:text-gray-500 mr-4">
+                        <i class="fas fa-bell"></i>
+                    </button>
+
+                    <!-- Menu profil -->
+                    <div class="ml-3 relative">
+                        <button type="button" class="flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" id="user-menu-button">
+                            <div class="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white">
+                                <?= strtoupper(substr($user['prenom'], 0, 1)) ?>
                             </div>
-                        </div>
-                    </div>
+                        </button>
 
-                    <div class="border rounded-lg p-4">
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-semibold">UX/UI Designer Senior</h4>
-                            <span class="px-2 py-1 bg-green-100 text-green-600 rounded-full text-sm">Active</span>
-                        </div>
-                        <p class="text-gray-500 text-sm mb-2">Lyon - CDI</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-500">8 candidatures</span>
-                            <div class="flex space-x-2">
-                                <button class="text-blue-500 hover:text-blue-600"><i class="fas fa-edit"></i></button>
-                                <button class="text-red-500 hover:text-red-600"><i class="fas fa-trash"></i></button>
+                        <!-- Menu déroulant -->
+                        <div id="user-menu" class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+                            <div class="py-1">
+                                <a href="../Etudiant/index.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-columns mr-2"></i>Accueil
+                                </a>
+                                <a href="../Etudiant/Catalogue/Cours.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-user mr-2"></i>Catalogue
+                                </a>
+                                <a href="parametres.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-cog mr-2"></i>Paramètres
+                                </a>
+                                <hr class="my-1">
+                                <form action="" method="POST">
+                                    <button type="submit" name="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                                        <i class="fas fa-sign-out-alt mr-2"></i>Déconnexion
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </nav>
 
-        <!-- Upcoming Interviews -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-semibold">Prochains entretiens</h3>
-                <a href="#" class="text-blue-500 hover:text-blue-600">Voir le calendrier</a>
+    <!-- Contenu principal -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- En-tête du dashboard -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">
+                Bonjour, <?= htmlspecialchars($user['prenom']) ?> 👋
+            </h1>
+            <p class="mt-2 text-gray-600">
+                Voici un aperçu de votre apprentissage
+            </p>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Total des cours -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                        <i class="fas fa-book-open text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-gray-500">Cours inscrits</h3>
+                        <p class="text-2xl font-semibold text-gray-900"><?= $totalCourses ?></p>
+                    </div>
+                </div>
             </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full">
-                    <thead>
-                        <tr class="border-b">
-                            <th class="text-left py-3">Candidat</th>
-                            <th class="text-left py-3">Poste</th>
-                            <th class="text-left py-3">Date</th>
-                            <th class="text-left py-3">Heure</th>
-                            <th class="text-left py-3">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="border-b">
-                            <td class="py-3">
-                                <div class="flex items-center space-x-3">
-                                    <img src="https://via.placeholder.com/32" alt="Candidate" class="rounded-full">
-                                    <span>Sophie Bernard</span>
+
+            <!-- Catégories -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                        <i class="fas fa-folder text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-gray-500">Catégories suivies</h3>
+                        <p class="text-2xl font-semibold text-gray-900"><?= $totalCategories ?></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dernière inscription -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                        <i class="fas fa-clock text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-gray-500">Dernière inscription</h3>
+                        <p class="text-2xl font-semibold text-gray-900"><?= $lastInscription ?></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des cours -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-6">Mes cours</h2>
+            
+            <?php if (empty($courses)): ?>
+                <div class="text-center py-12">
+                    <div class="text-gray-400 mb-4">
+                        <i class="fas fa-book-open text-5xl"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">
+                        Vous n'êtes inscrit à aucun cours
+                    </h3>
+                    <p class="text-gray-600 mb-4">
+                        Explorez notre catalogue pour commencer votre apprentissage
+                    </p>
+                    <a href="catalogue.php" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                        Voir le catalogue
+                    </a>
+                </div>
+            <?php else: ?>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <?php foreach ($courses as $course): ?>
+                        <div class="border rounded-xl p-6 hover:shadow-md transition duration-300">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <i class="fas fa-graduation-cap text-blue-600"></i>
                                 </div>
-                            </td>
-                            <td>Développeur Frontend</td>
-                            <td>12 Jan 2024</td>
-                            <td>14:00</td>
-                            <td class="space-x-2">
-                                <button class="text-blue-500 hover:text-blue-600"><i class="fas fa-video"></i></button>
-                                <button class="text-gray-500 hover:text-gray-600"><i class="fas fa-edit"></i></button>
-                                <button class="text-red-500 hover:text-red-600"><i class="fas fa-times"></i></button>
-                            </td>
-                        </tr>
-                        <tr class="border-b">
-                            <td class="py-3">
-                                <div class="flex items-center space-x-3">
-                                    <img src="https://via.placeholder.com/32" alt="Candidate" class="rounded-full">
-                                    <span>Pierre Durand</span>
-                                </div>
-                            </td>
-                            <td>UX Designer</td>
-                            <td>13 Jan 2024</td>
-                            <td>10:30</td>
-                            <td class="space-x-2">
-                                <button class="text-blue-500 hover:text-blue-600"><i class="fas fa-video"></i></button>
-                                <button class="text-gray-500 hover:text-gray-600"><i class="fas fa-edit"></i></button>
-                                <button class="text-red-500 hover:text-red-600"><i class="fas fa-times"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            </div>
-
-        <!-- Quick Actions & Messages -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-            <!-- Quick Actions -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-xl font-semibold mb-6">Actions rapides</h3>
-                <div class="grid grid-cols-2 gap-4">
-                    <button class="flex flex-col items-center justify-center p-4 border rounded-lg hover:bg-gray-50 transition">
-                        <i class="fas fa-plus-circle text-blue-500 text-2xl mb-2"></i>
-                        <span class="text-sm">Nouvelle offre</span>
-                    </button>
-                    <button class="flex flex-col items-center justify-center p-4 border rounded-lg hover:bg-gray-50 transition">
-                        <i class="fas fa-calendar-plus text-blue-500 text-2xl mb-2"></i>
-                        <span class="text-sm">Planifier entretien</span>
-                    </button>
-                    <button class="flex flex-col items-center justify-center p-4 border rounded-lg hover:bg-gray-50 transition">
-                        <i class="fas fa-file-export text-blue-500 text-2xl mb-2"></i>
-                        <span class="text-sm">Exporter données</span>
-                    </button>
-                    <button class="flex flex-col items-center justify-center p-4 border rounded-lg hover:bg-gray-50 transition">
-                        <i class="fas fa-chart-bar text-blue-500 text-2xl mb-2"></i>
-                        <span class="text-sm">Voir statistiques</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Recent Messages -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-semibold">Messages récents</h3>
-                    <a href="#" class="text-blue-500 hover:text-blue-600">Voir tous les messages</a>
-                </div>
-                <div class="space-y-4">
-                    <div class="flex items-center space-x-4 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                        <img src="https://via.placeholder.com/40" alt="User" class="rounded-full">
-                        <div class="flex-1">
-                            <div class="flex justify-between items-start">
-                                <h4 class="font-semibold">Marie Lambert</h4>
-                                <span class="text-xs text-gray-500">10:30</span>
+                                <span class="text-sm text-gray-500">
+                                    <?= $course['date_inscription'] ?>
+                                </span>
                             </div>
-                            <p class="text-sm text-gray-600 truncate">À propos de l'entretien de demain...</p>
-                        </div>
-                        <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
-                    </div>
+                            
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                                <?= htmlspecialchars($course['titre']) ?>
+                            </h3>
+                            
+                            <p class="text-sm text-gray-600 mb-4">
+                                <?= htmlspecialchars(substr($course['description'], 0, 100)) ?>...
+                            </p>
 
-                    <div class="flex items-center space-x-4 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                        <img src="https://via.placeholder.com/40" alt="User" class="rounded-full">
-                        <div class="flex-1">
-                            <div class="flex justify-between items-start">
-                                <h4 class="font-semibold">Thomas Dubois</h4>
-                                <span class="text-xs text-gray-500">09:15</span>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500">
+                                    <?= htmlspecialchars($course['category_name']) ?>
+                                </span>
+                                <a href="cours-details.php?id=<?= $course['cours_id'] ?>" class="text-blue-600 hover:text-blue-800">
+                                    Continuer →
+                                </a>
                             </div>
-                            <p class="text-sm text-gray-600 truncate">Merci pour votre retour concernant...</p>
                         </div>
-                    </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <!-- Section recherche -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="max-w-3xl mx-auto text-center">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">
+                    Découvrez de nouveaux cours
+                </h2>
+                <p class="text-gray-600 mb-6">
+                    Explorez notre catalogue complet de cours et développez vos compétences
+                </p>
+                <form action="catalogue.php" method="GET" class="flex gap-4 max-w-lg mx-auto">
+                    <input type="text" name="search" placeholder="Rechercher un cours..." 
+                           class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300">
+                        Rechercher
+                    </button>
+                </form>
+                <div class="mt-4">
+                    <a href="catalogue.php" class="text-blue-600 hover:text-blue-800">
+                        Voir tous les cours disponibles →
+                    </a>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Footer -->
-        <footer class="mt-8 text-center text-gray-500 text-sm">
-            <p>&copy; 2024 CareerLink. Tous droits réservés.</p>
-        </footer>
-    </main>
-
+    <!-- Scripts -->
     <script>
-        // Notifications dropdown
-        const notificationBtn = document.querySelector('.fa-bell').parentElement;
-        notificationBtn.addEventListener('click', function() {
-            // Add notification dropdown logic here
+        const userMenuButton = document.getElementById('user-menu-button');
+        const userMenu = document.getElementById('user-menu');
+
+        userMenuButton.addEventListener('click', () => {
+            const isHidden = userMenu.classList.contains('hidden');
+            userMenu.classList.toggle('hidden', !isHidden);
         });
 
-        // Job posting buttons
-        document.querySelectorAll('.fa-edit').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                // Add edit job logic here
-            });
-        });
-
-        document.querySelectorAll('.fa-trash').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                if(confirm('Êtes-vous sûr de vouloir supprimer cette offre ?')) {
-                    // Add delete job logic here
-                }
-            });
-        });
-
-        // Quick action buttons
-        document.querySelectorAll('.grid-cols-2 button').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const action = this.querySelector('span').textContent;
-                switch(action) {
-                    case 'Nouvelle offre':
-                        // Handle new job creation
-                        break;
-                    case 'Planifier entretien':
-                        // Handle interview scheduling
-                        break;
-                    case 'Exporter données':
-                        // Handle data export
-                        break;
-                    case 'Voir statistiques':
-                        // Handle statistics view
-                        break;
-                }
-            });
+        document.addEventListener('click', (event) => {
+            if (!userMenuButton.contains(event.target) && !userMenu.contains(event.target)) {
+                userMenu.classList.add('hidden');
+            }
         });
     </script>
 </body>
